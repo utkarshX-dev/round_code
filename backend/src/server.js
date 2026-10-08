@@ -1,49 +1,68 @@
-import dotenv from 'dotenv';
-import app from './app.js';
-import { connectDB } from './config/db.js';
-import { initMailer } from './config/mailer.js';
-import POTW from './models/POTW.js';
-import { processPOTWPenalties } from './utils/penaltyWorker.js';
-
+import dotenv from "dotenv";
 dotenv.config();
+
+import app from "./app.js";
+import { connectDB } from "./config/db.js";
+import { initMailer } from "./config/mailer.js";
+import POTW from "./models/POTW.js";
+import { processPOTWPenalties } from "./utils/penaltyWorker.js";
 
 const PORT = process.env.PORT || 5000;
 
 const checkPOTWDeadlines = async () => {
   try {
     const now = new Date();
+
     const expiredActivePOTWs = await POTW.find({
-      status: 'active',
+      status: "active",
       deadline: { $lte: now },
       penaltyProcessed: false,
     });
 
     for (const potw of expiredActivePOTWs) {
-      console.log(`POTW #${potw.weekNumber} deadline passed. Processing no-submission penalties...`);
+      console.log(
+        `POTW #${potw.weekNumber} deadline passed. Processing no-submission penalties...`
+      );
+
       await processPOTWPenalties(potw._id);
-      potw.status = 'closed';
+
+      potw.status = "closed";
       await potw.save();
-      console.log(`POTW #${potw.weekNumber} marked closed and penalties applied.`);
+
+      console.log(
+        `POTW #${potw.weekNumber} marked closed and penalties applied.`
+      );
     }
   } catch (err) {
-    console.error('Error in POTW deadline worker:', err.message);
+    console.error("Error in POTW deadline worker:", err.message);
   }
 };
 
 const startServer = async () => {
-  await connectDB();
-  initMailer();
+  try {
+    console.log("🔥 Starting local ROUNDCode server...");
 
-  // Periodic deadline worker
-  setInterval(checkPOTWDeadlines, 5 * 60 * 1000);
+    await connectDB();
 
-  app.listen(PORT, () => {
-    console.log(`\n=================================================`);
-    console.log(`🚀 ROUNDCode REST API Server running on port ${PORT}`);
-    console.log(`⚡ Round Table DTU Coding & Skill Platform`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-    console.log(`=================================================\n`);
-  });
+    initMailer();
+
+    setInterval(checkPOTWDeadlines, 5 * 60 * 1000);
+
+    app.listen(PORT, () => {
+      console.log(`
+=================================================
+🚀 ROUNDCode REST API Server running on port ${PORT}
+⚡ Round Table DTU Coding & Skill Platform
+🔗 Health check: http://localhost:${PORT}/health
+=================================================
+`);
+    });
+  } catch (error) {
+    console.error("❌ Server startup failed:", error.message);
+    process.exit(1);
+  }
 };
 
 startServer();
+
+export default app;
