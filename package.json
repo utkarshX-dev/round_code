@@ -1,0 +1,31 @@
+{
+  "name": "roundcode",
+  "version": "1.0.0",
+  "description": "ROUNDCode — Round Table DTU Coding & Skill Development Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "node start.js",
+    "start": "node start.js",
+    "dev:concurrently": "concurrently -k -n \"backend,frontend\" -c \"cyan.bold,magenta.bold\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "seed": "npm --prefix backend run seed",
+    "db:reset": "npm --prefix backend run db:reset",
+    "db:init": "npm --prefix backend run db:init",
+    "test": "npm --prefix backend test",
+    "build:frontend": "npm --prefix frontend run build",
+    "test:db": "npm --prefix backend run test:db"
+  },
+  "keywords": [
+    "roundcode",
+    "dtu",
+    "round-table",
+    "potw",
+    "coding-platform"
+  ],
+  "author": "Round Table DTU",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

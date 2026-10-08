@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+:root {
+  --background: #090a0f;
+  --foreground: #f4f4f5;
+  --card-bg: #12131b;
+  --card-border: #202230;
+  --accent-lime: #a3ff20;
+  --accent-lime-shadow: #70b809;
+  --accent-lilac: #b4a2f8;
+  --accent-lilac-shadow: #795ee0;
+}
+
+body {
+  background-color: #090a0f;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+  color: #f4f4f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle clean dark grid utility */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+/* 
+  TACTILE 3D BUTTONS
+  These implement the physical press-down feel shown in the screenshots:
+  - High tactile feedback
+  - Solid bottom extrusion
+  - Smooth active translation with shadow collapse
+*/
+
+/* 1. Tactile Outline Button (Exact match for the screenshot) */
+.btn-tactile-outline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #12131c;
+  color: #ffffff;
+  border: 2px solid #a3ff20;
+  border-radius: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 0 0 #a3ff20;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.8125rem;
+}
+
+.btn-tactile-outline:hover {
+  background-color: #1a1c29;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 0 #a3ff20;
+}
+
+.btn-tactile-outline:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #a3ff20;
+}
+
+/* 2. Tactile Solid Lime Button */
+.btn-tactile-lime {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #a3ff20;
+  color: #000000;
+  border: 2px solid #a3ff20;
+  border-radius: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 0 0 #6cb204;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.8125rem;
+}
+
+.btn-tactile-lime:hover {
+  background-color: #b5ff38;
+  border-color: #b5ff38;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 0 #6cb204;
+}
+
+.btn-tactile-lime:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #6cb204;
+}
+
+/* 3. Tactile Dark Button */
+.btn-tactile-dark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #12131c;
+  color: #f4f4f5;
+  border: 2px solid #282a3d;
+  border-radius: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 0 0 #282a3d;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.8125rem;
+}
+
+.btn-tactile-dark:hover {
+  border-color: #3d4059;
+  background-color: #1a1c29;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 0 #3d4059;
+}
+
+.btn-tactile-dark:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #282a3d;
+}
+
+/* 4. Tactile Lilac Button */
+.btn-tactile-lilac {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #b4a2f8;
+  color: #000000;
+  border: 2px solid #b4a2f8;
+  border-radius: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 0 0 #7b60dc;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.8125rem;
+}
+
+.btn-tactile-lilac:hover {
+  background-color: #c4b5fd;
+  border-color: #c4b5fd;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 0 #7b60dc;
+}
+
+.btn-tactile-lilac:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #7b60dc;
+}
+
+/* Tactile Card Style */
+.tactile-card {
+  background-color: #12131b;
+  border: 1px solid #202230;
+  border-radius: 1.25rem;
+}
+
+.tactile-card-hover {
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.tactile-card-hover:hover {
+  border-color: #a3ff20;
+  transform: translateY(-2px);
+}
+
+/* Glass panel fallback - now clean solid dark */
+.glass-panel {
+  background-color: #12131b;
+  border: 1px solid #202230;
+  border-radius: 1.25rem;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #090a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #202230;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #36384a;
+}
