@@ -30,8 +30,8 @@ const seed = async () => {
     console.log('Seeding Users...');
     // 1 Super Admin
     const superAdmin = await User.create({
-      name: 'Dr. Akhil Sharma (President RT)',
-      dtuEmail: 'president.rt@dtu.ac.in',
+      name: 'super admin',
+      dtuEmail: 'super_admin_roundtable@dtu.ac.in',
       personalEmail: 'superadmin@roundtabledtu.in',
       password: 'Password@123',
       role: 'super_admin',
