@@ -12,20 +12,28 @@ export const connectDB = async () => {
     console.log("MONGO_URI exists:", !!mongoUri);
     console.log("NODE_ENV:", process.env.NODE_ENV);
 
+    // Production MUST use MongoDB Atlas
     if (!mongoUri || mongoUri.trim() === "") {
       if (process.env.NODE_ENV === "production") {
         throw new Error("MONGO_URI is missing in production");
       }
 
-      console.log("No MONGO_URI. Starting in-memory MongoDB...");
+      console.log(
+        "No external MONGO_URI specified. Starting in-memory MongoDB..."
+      );
 
       mongoMemoryServer = await MongoMemoryServer.create();
+
       const memoryUri = mongoMemoryServer.getUri();
 
-      const conn = await mongoose.connect(memoryUri);
+      const conn = await mongoose.connect(memoryUri, {
+        autoIndex: true,
+      });
 
       console.log("✅ In-memory MongoDB connected");
       console.log("Database:", conn.connection.name);
+      console.log("Host:", conn.connection.host);
+      console.log("=================================");
 
       return conn;
     }
@@ -44,7 +52,6 @@ export const connectDB = async () => {
     console.log("=================================");
 
     return conn;
-
   } catch (error) {
     console.error("❌ MONGODB CONNECTION FAILED");
     console.error("Message:", error.message);
@@ -52,7 +59,7 @@ export const connectDB = async () => {
     console.error("Code:", error.code);
     console.error("=================================");
 
-    // Development fallback ONLY
+    // Development-only fallback
     if (
       process.env.NODE_ENV !== "production" &&
       !mongoMemoryServer
@@ -67,6 +74,7 @@ export const connectDB = async () => {
         const conn = await mongoose.connect(fallbackUri);
 
         console.log("✅ Fallback in-memory MongoDB connected");
+        console.log("Database:", conn.connection.name);
 
         return conn;
       } catch (fallbackError) {
@@ -79,16 +87,22 @@ export const connectDB = async () => {
       }
     }
 
-    // NEVER process.exit() on Vercel
+    // Never use process.exit() in Vercel/serverless
     throw error;
   }
 };
 
 export const closeDB = async () => {
-  await mongoose.disconnect();
+  try {
+    await mongoose.disconnect();
 
-  if (mongoMemoryServer) {
-    await mongoMemoryServer.stop();
-    mongoMemoryServer = null;
+    if (mongoMemoryServer) {
+      await mongoMemoryServer.stop();
+      mongoMemoryServer = null;
+    }
+
+    console.log("MongoDB disconnected");
+  } catch (error) {
+    console.error("MongoDB disconnect error:", error.message);
   }
 };

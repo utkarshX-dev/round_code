@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+
 dotenv.config();
 
 import app from "./app.js";
@@ -9,13 +10,19 @@ import { processPOTWPenalties } from "./utils/penaltyWorker.js";
 
 const PORT = process.env.PORT || 5000;
 
+// =====================================================
+// POTW DEADLINE WORKER
+// =====================================================
+
 const checkPOTWDeadlines = async () => {
   try {
     const now = new Date();
 
     const expiredActivePOTWs = await POTW.find({
       status: "active",
-      deadline: { $lte: now },
+      deadline: {
+        $lte: now,
+      },
       penaltyProcessed: false,
     });
 
@@ -27,6 +34,7 @@ const checkPOTWDeadlines = async () => {
       await processPOTWPenalties(potw._id);
 
       potw.status = "closed";
+
       await potw.save();
 
       console.log(
@@ -34,19 +42,41 @@ const checkPOTWDeadlines = async () => {
       );
     }
   } catch (err) {
-    console.error("Error in POTW deadline worker:", err.message);
+    console.error(
+      "Error in POTW deadline worker:",
+      err.message
+    );
   }
 };
 
+// =====================================================
+// START LOCAL SERVER
+// =====================================================
+
 const startServer = async () => {
   try {
-    console.log("🔥 Starting local ROUNDCode server...");
+    console.log(
+      "🔥 Starting local ROUNDCode server..."
+    );
+
+    console.log(
+      "MONGO_URI exists:",
+      !!process.env.MONGO_URI
+    );
 
     await connectDB();
 
+    console.log(
+      "🔥 DATABASE CONNECTION FINISHED"
+    );
+
     initMailer();
 
-    setInterval(checkPOTWDeadlines, 5 * 60 * 1000);
+    // Periodic deadline worker
+    setInterval(
+      checkPOTWDeadlines,
+      5 * 60 * 1000
+    );
 
     app.listen(PORT, () => {
       console.log(`
@@ -58,11 +88,20 @@ const startServer = async () => {
 `);
     });
   } catch (error) {
-    console.error("❌ Server startup failed:", error.message);
+    console.error(
+      "❌ Server startup failed:",
+      error.message
+    );
+
     process.exit(1);
   }
 };
 
+// =====================================================
+// START SERVER
+// =====================================================
+
 startServer();
 
+// Export Express app for Vercel
 export default app;
