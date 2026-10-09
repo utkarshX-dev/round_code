@@ -24,14 +24,16 @@ export default function Navbar() {
   ].includes(pathname);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-[#090a0f]/95 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-[#090a0f]/90 backdrop-blur-xl supports-[backdrop-filter]:bg-[#090a0f]/75">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a3ff20]/70 to-transparent" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[4.5rem] flex items-center justify-between">
 
         {/* Brand */}
         <Link
           id="tour-brand"
           href={user ? '/dashboard' : '/'}
-          className="flex items-center gap-3 group"
+          aria-label="ROUNDCode home"
+          className="flex items-center gap-3 group rounded-xl"
         >
           <RoundTableLogo
             size={38}
@@ -60,14 +62,14 @@ export default function Navbar() {
 
                 <Link
                   href="/rules"
-                  className="text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white transition-colors px-3 py-1.5 rounded-lg"
+                  className="text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors px-3 py-2 rounded-lg"
                 >
                   Rules
                 </Link>
 
                 <Link
                   href="/leaderboard"
-                  className="text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white transition-colors px-3 py-1.5 rounded-lg"
+                  className="text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors px-3 py-2 rounded-lg"
                 >
                   Leaderboard
                 </Link>
@@ -133,7 +135,8 @@ export default function Navbar() {
               <button
                 onClick={logout}
                 title="Log out"
-                className="p-2 text-zinc-400 hover:text-rose-400 hover:bg-zinc-800/80 rounded-xl transition-colors"
+                aria-label="Log out"
+                className="p-2.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>

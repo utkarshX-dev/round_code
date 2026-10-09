@@ -24,6 +24,27 @@ body {
   overflow-x: hidden;
 }
 
+*:focus-visible {
+  outline: 2px solid var(--accent-lime);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent-lime);
+  color: #090a0f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Subtle clean dark grid utility */
 .bg-grid-pattern {
   background-size: 32px 32px;
@@ -188,9 +209,20 @@ body {
 
 /* Glass panel fallback - now clean solid dark */
 .glass-panel {
-  background-color: #12131b;
-  border: 1px solid #202230;
+  background: linear-gradient(145deg, rgba(24, 26, 38, 0.96), rgba(13, 15, 24, 0.96));
+  border: 1px solid rgba(54, 56, 74, 0.75);
   border-radius: 1.25rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+}
+
+button:disabled,
+a[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 0.65;
 }
 
 /* Custom Sleek Scrollbar */

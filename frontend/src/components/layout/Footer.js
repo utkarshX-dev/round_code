@@ -15,7 +15,8 @@ export default function Footer() {
   return (
     <footer className="mt-20 space-y-6 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Lilac banner bar matching sample image 3 */}
-      <div className="bg-[#b4a2f8] text-black rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#c4b5fd] via-[#b4a2f8] to-[#a99af0] text-black rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg shadow-[#b4a2f8]/10">
+        <div className="absolute -right-12 -top-16 w-48 h-48 rounded-full bg-white/20 blur-3xl pointer-events-none" />
         <div className="flex items-center gap-3">
           <RoundTableLogo size={40} className="rounded-xl overflow-hidden bg-black p-0.5" />
           <span className="text-xl sm:text-2xl font-black tracking-tight uppercase">
@@ -108,17 +109,7 @@ export default function Footer() {
                   DTU Official Portal
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <FolderGit2 className="w-3.5 h-3.5 text-zinc-400" />
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
-                  GitHub Organization
-                </a>
-              </li>
+              
               <li className="text-[11px] text-zinc-500 pt-2">
                 Campus domain: <span className="text-[#a3ff20] font-semibold">@dtu.ac.in</span>
               </li>

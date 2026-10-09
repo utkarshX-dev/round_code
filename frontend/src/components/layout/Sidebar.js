@@ -50,7 +50,7 @@ export default function Sidebar() {
 
   return (
     <aside id="tour-sidebar-nav" className="w-64 flex-shrink-0 hidden md:block">
-      <div className="sticky top-20 flex flex-col gap-6 p-4 rounded-2xl glass-panel border border-slate-800">
+      <div className="sticky top-24 flex flex-col gap-6 p-4 rounded-2xl glass-panel border border-slate-800/80 shadow-xl shadow-black/10">
         {/* Member Navigation */}
         <div>
           <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono mb-2">
@@ -116,7 +116,7 @@ export default function Sidebar() {
         )}
 
         {/* Round Table Society Quick Card */}
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+        <div className="p-3.5 rounded-xl bg-gradient-to-br from-slate-900/80 to-slate-950/60 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
           <p className="font-semibold text-slate-300 mb-1">Round Table DTU</p>
           <p className="text-[10px]">
             Private skill & competitive coding ecosystem for members.

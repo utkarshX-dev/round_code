@@ -4,15 +4,73 @@ import { AuthProvider } from '@/context/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 
 export const metadata = {
-  title: 'ROUNDCode — Round Table DTU Coding & Skill Development Platform',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://roundcode.vercel.app'),
+  title: {
+    default: 'ROUNDCode — Round Table DTU',
+    template: '%s | ROUNDCode',
+  },
   description:
     'ROUNDCode is the private competitive coding and skill-development platform for Round Table Delhi Technological University (DTU) members. Weekly Problem of the Week (POTW), difficulty scoring, ratings, and developer profiles.',
-  keywords: 'Round Table DTU, DTU, coding, POTW, LeetCode, Codeforces, developer platform',
-  icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+  keywords: [
+    'Round Table DTU',
+    'competitive programming',
+    'coding challenges',
+    'weekly coding challenge',
+    'POTW',
+    'LeetCode',
+    'Codeforces',
+    'developer portfolio',
+  ],
+  applicationName: 'ROUNDCode',
+  authors: [{ name: 'Round Table DTU' }],
+  creator: 'Round Table DTU',
+  publisher: 'Round Table DTU',
+  alternates: {
+    canonical: '/',
   },
+  category: 'education',
+  openGraph: {
+    type: 'website',
+    siteName: 'ROUNDCode by Round Table DTU',
+    title: 'ROUNDCode — Weekly Coding Challenges for Round Table DTU',
+    description:
+      'Solve weekly algorithmic challenges, receive verified code reviews, and build your competitive programming profile with Round Table DTU.',
+    url: '/',
+    images: [
+      {
+        url: '/roundtable-icon.png',
+        width: 690,
+        height: 650,
+        alt: 'Round Table DTU logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'ROUNDCode — Round Table DTU',
+    description: 'Weekly coding challenges, verified reviews, and transparent ratings for Round Table DTU members.',
+    images: ['/roundtable-icon.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    icon: '/roundtable-icon.png',
+    shortcut: '/roundtable-icon.png',
+    apple: '/roundtable-icon.png',
+  },
+};
+
+export const viewport = {
+  themeColor: '#090a0f',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({ children }) {

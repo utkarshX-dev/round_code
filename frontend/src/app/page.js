@@ -15,6 +15,16 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'EducationalOrganization',
+  name: 'Round Table DTU',
+  url: 'https://roundcode.vercel.app',
+  logo: 'https://roundcode.vercel.app/roundtable-icon.png',
+  description:
+    'ROUNDCode is a private competitive programming and skill-development platform for Round Table DTU members.',
+};
+
 export default function LandingPage() {
   const [currentPotw, setCurrentPotw] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -46,18 +56,22 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col gap-20 py-6 max-w-6xl mx-auto px-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Hero Section matching Screenshot 1 */}
-      <section className="relative pt-10 pb-12 text-center max-w-4xl mx-auto">
+      <section aria-labelledby="landing-heading" className="relative pt-10 pb-12 text-center max-w-4xl mx-auto">
         {/* Subtle grid pattern background */}
         <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-10" />
 
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#12131b] border border-[#202230] text-[#b4a2f8] text-xs font-bold uppercase tracking-wider mb-6">
           <RoundTableLogo size={24} className="rounded-full" showGlow={true} />
-          <span>Round Table DTU • Technical Division</span>
+          <span>RoundCode by Roundtable DTU</span>
         </div>
 
         {/* Punchy uppercase typography matching "TIME INTO SMART TIME" */}
-        <h1 className="text-4xl sm:text-7xl font-black tracking-tight uppercase leading-[1.05] mb-5 text-white">
+        <h1 id="landing-heading" className="text-4xl sm:text-7xl font-black tracking-tight uppercase leading-[1.05] mb-5 text-white">
           Turn Code Into{' '}
           <span className="text-[#a3ff20] block sm:inline">
             Real Mastery
@@ -112,7 +126,7 @@ export default function LandingPage() {
       </section>
 
       {/* Hero Action Card inspired by Screenshot 3: Vibrant Lime Banner */}
-      <section className="w-full">
+      <section aria-labelledby="weekly-challenge-heading" className="w-full">
         <div className="bg-[#a3ff20] text-black rounded-3xl p-8 sm:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
           <div className="flex items-center gap-6">
             <RoundTableLogo size={72} className="rounded-2xl hidden sm:inline-flex bg-black p-1 shadow-md" />
@@ -120,7 +134,7 @@ export default function LandingPage() {
               <span className="text-xs font-black uppercase tracking-wider bg-black text-[#a3ff20] px-3 py-1 rounded-lg inline-block">
                 Weekly Challenge
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-none text-black">
+              <h2 id="weekly-challenge-heading" className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-none text-black">
                 Let&apos;s See What Your Brain Can Do
               </h2>
               <p className="text-sm font-bold text-black/80 max-w-md">
@@ -147,9 +161,9 @@ export default function LandingPage() {
       </section>
 
       {/* How ROUNDCode Works Section */}
-      <section className="w-full">
+      <section aria-labelledby="progress-heading" className="w-full">
         <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">
+          <h2 id="progress-heading" className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">
             Show Progress
           </h2>
           <p className="text-sm text-zinc-400 max-w-md mx-auto mt-2">
@@ -160,7 +174,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { step: '01', title: 'Pick Weekly Tasks', desc: 'Every Monday, 3 handpicked LeetCode/Codeforces problems unlock.' },
-            { step: '02', title: 'Submit Solution', desc: 'Submit clean code, time/space complexity analysis, and drive link proof.' },
+            { step: '02', title: 'Submit Solution', desc: 'Submit clean code and time/space complexity analysis, with optional proof links.' },
             { step: '03', title: 'Admin Evaluation', desc: 'Tech leads inspect approach, edge cases, and code cleanliness.' },
             { step: '04', title: 'Earn 0-6 Points', desc: 'Score points for optimal complexity and validated submissions.' },
             { step: '05', title: 'Rating Updates', desc: 'Rating rises with every approved problem. Inactivity incurs penalty.' },
