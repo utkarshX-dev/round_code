@@ -16,12 +16,11 @@ import {
   FileCheck2,
   CalendarPlus,
   Crown,
-  Sparkles,
 } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, isAdmin, isSuperAdmin, openTour } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
 
   const memberLinks = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -77,15 +76,6 @@ export default function Sidebar() {
               );
             })}
 
-            {/* Platform Tour quick launcher */}
-            <button
-              type="button"
-              onClick={openTour}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-[#a3ff20] hover:bg-slate-800/50 transition-all text-left w-full group mt-1"
-            >
-              <Sparkles className="w-4 h-4 text-[#a3ff20] group-hover:scale-110 transition-transform" />
-              <span>Platform Tour</span>
-            </button>
           </nav>
         </div>
 

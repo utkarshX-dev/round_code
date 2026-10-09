@@ -33,13 +33,13 @@ const problemSubmissionSchema = new mongoose.Schema(
     },
     submissionLink: {
       type: String,
-      required: [true, 'Submission link is required'],
       trim: true,
+      default: '',
     },
     driveLink: {
       type: String,
-      required: [true, 'Drive/Proof link is required'],
       trim: true,
+      default: '',
     },
     score: {
       type: Number,

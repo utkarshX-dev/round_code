@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Code2, Trophy, Users, User } from 'lucide-react';
-import NextStepTourWrapper from '@/components/tour/NextStepTour';
 
 export default function AppLayout({ children }) {
   const { user } = useAuth();
@@ -18,8 +17,7 @@ export default function AppLayout({ children }) {
   const showSidebar = user && !isPublicPage;
 
   return (
-    <NextStepTourWrapper>
-      <div className="min-h-screen flex flex-col bg-radial-glow">
+    <div className="min-h-screen flex flex-col bg-radial-glow">
         <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -85,7 +83,6 @@ export default function AppLayout({ children }) {
       )}
 
       {isPublicPage && <Footer />}
-      </div>
-    </NextStepTourWrapper>
+    </div>
   );
 }

@@ -4,17 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useNextStep } from 'nextstepjs';
 
 import NotificationDropdown from '@/components/common/NotificationDropdown';
 import { RoleBadge } from '@/components/common/Badge';
 import RoundTableLogo from '@/components/common/RoundTableLogo';
 
-import { Code2, LogOut, User, Sparkles } from 'lucide-react';
+import { Code2, LogOut, User } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { startNextStep } = useNextStep();
 
   const pathname = usePathname();
 
@@ -94,23 +92,6 @@ export default function Navbar() {
           ) : (
 
             <div className="flex items-center gap-2.5 sm:gap-3">
-
-              {/* Platform Review Tour Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  console.log('Starting ROUNDCode tour...');
-                  startNextStep('mainTour');
-                }}
-                title="Review Platform Tour"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-zinc-300 hover:text-white bg-[#14151e] border border-zinc-800 hover:border-[#a3ff20]/40 rounded-xl transition-all shadow-sm"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#a3ff20]" />
-
-                <span className="hidden sm:inline text-[11px] uppercase tracking-wider font-bold">
-                  Review Tour
-                </span>
-              </button>
 
               {/* Notification Center */}
               <NotificationDropdown />

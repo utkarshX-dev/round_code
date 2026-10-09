@@ -34,6 +34,17 @@ const validateProblemsStructure = (problems) => {
   return null;
 };
 
+const getWeekSequenceError = async (weekNumber) => {
+  if (weekNumber <= 1) return null;
+
+  const previousWeek = await POTW.findOne({ weekNumber: weekNumber - 1 });
+  if (!previousWeek || !['active', 'closed'].includes(previousWeek.status)) {
+    return `Publish POTW week #${weekNumber - 1} before creating week #${weekNumber}.`;
+  }
+
+  return null;
+};
+
 // GET /api/potws/current
 export const getCurrentPOTW = async (req, res, next) => {
   try {
@@ -137,21 +148,44 @@ export const getPOTWById = async (req, res, next) => {
 // POST /api/potws (Admin only)
 export const createPOTW = async (req, res, next) => {
   try {
-    const { weekNumber, title, description, problems, publishAt, deadline, status = 'draft' } = req.body;
+    const { weekNumber, title, description, problems, publishAt, status = 'draft' } = req.body;
 
-    if (!weekNumber || !title || !publishAt || !deadline) {
+    if (!weekNumber || !title) {
       return res.status(400).json({
         success: false,
-        message: 'Week Number, Title, Publish Date, and Deadline are required.',
+        message:
+          'Week Number and Title are required.',
       });
     }
 
-    // Validate deadline is after publishAt
-    if (new Date(deadline) <= new Date(publishAt)) {
+    const sequenceError = await getWeekSequenceError(weekNumber);
+    if (sequenceError) {
+      return res.status(400).json({ success: false, message: sequenceError });
+    }
+
+    const existingWeek = await POTW.findOne({ weekNumber });
+    if (existingWeek) {
+      const state = existingWeek.status === 'draft' ? 'drafted' : 'published';
       return res.status(400).json({
         success: false,
-        message: 'Deadline must be later than the publish date.',
+        message: `POTW for week #${weekNumber} is already ${state}.`,
       });
+    }
+
+    const effectivePublishAt = status === 'active'
+      ? (publishAt ? new Date(publishAt) : new Date())
+      : null;
+    if (effectivePublishAt && Number.isNaN(effectivePublishAt.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Publish date is invalid.',
+      });
+    }
+    const effectiveDeadline = effectivePublishAt
+      ? new Date(effectivePublishAt)
+      : null;
+    if (effectiveDeadline) {
+      effectiveDeadline.setDate(effectiveDeadline.getDate() + 7);
     }
 
     // Strict validation: exactly 3 problems (Easy: 1, Medium: 2, Hard: 3)
@@ -176,8 +210,8 @@ export const createPOTW = async (req, res, next) => {
       title: title.trim(),
       description: description?.trim() || '',
       problems,
-      publishAt: new Date(publishAt),
-      deadline: new Date(deadline),
+      publishAt: effectivePublishAt,
+      deadline: effectiveDeadline,
       status,
       createdBy: req.user.id,
     });
@@ -228,7 +262,7 @@ export const updatePOTW = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'POTW not found' });
     }
 
-    const { weekNumber, title, description, problems, publishAt, deadline, status } = req.body;
+    const { weekNumber, title, description, problems, publishAt, status } = req.body;
 
     // If changing to active, ensure no other active POTW exists
     if (status === 'active' && potw.status !== 'active') {
@@ -237,6 +271,23 @@ export const updatePOTW = async (req, res, next) => {
         return res.status(400).json({
           success: false,
           message: `Cannot activate: POTW #${activePOTW.weekNumber} is already active.`,
+        });
+      }
+
+    }
+
+    if (weekNumber !== undefined && weekNumber !== potw.weekNumber) {
+      const sequenceError = await getWeekSequenceError(weekNumber);
+      if (sequenceError) {
+        return res.status(400).json({ success: false, message: sequenceError });
+      }
+
+      const existingWeek = await POTW.findOne({ weekNumber, _id: { $ne: potw._id } });
+      if (existingWeek) {
+        const state = existingWeek.status === 'draft' ? 'drafted' : 'published';
+        return res.status(400).json({
+          success: false,
+          message: `POTW for week #${weekNumber} is already ${state}.`,
         });
       }
     }
@@ -253,11 +304,19 @@ export const updatePOTW = async (req, res, next) => {
     if (weekNumber !== undefined) potw.weekNumber = weekNumber;
     if (title) potw.title = title.trim();
     if (description !== undefined) potw.description = description.trim();
-    if (publishAt) potw.publishAt = new Date(publishAt);
-    if (deadline) potw.deadline = new Date(deadline);
+    if (status === 'active' && potw.status !== 'active') {
+      potw.publishAt = new Date();
+      potw.deadline = new Date(potw.publishAt);
+      potw.deadline.setDate(potw.deadline.getDate() + 7);
+    } else if (status === 'draft') {
+      potw.publishAt = null;
+      potw.deadline = null;
+    } else if (publishAt) {
+      potw.publishAt = new Date(publishAt);
+    }
     if (status) potw.status = status;
 
-    if (potw.deadline <= potw.publishAt) {
+    if (potw.deadline && potw.publishAt && potw.deadline <= potw.publishAt) {
       return res.status(400).json({
         success: false,
         message: 'Deadline must be later than publish date.',

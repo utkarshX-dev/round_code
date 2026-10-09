@@ -95,17 +95,17 @@ export const submitPOTW = async (req, res, next) => {
         });
       }
 
-      if (!isValidUrl(submitted.submissionLink)) {
+      if (submitted.submissionLink?.trim() && !isValidUrl(submitted.submissionLink)) {
         return res.status(400).json({
           success: false,
-          message: `Valid external submission URL (e.g. https://leetcode.com/...) is required for "${q.title}".`,
+          message: `External submission link for "${q.title}" must be a valid http:// or https:// URL.`,
         });
       }
 
-      if (!isValidUrl(submitted.driveLink)) {
+      if (submitted.driveLink?.trim() && !isValidUrl(submitted.driveLink)) {
         return res.status(400).json({
           success: false,
-          message: `Valid Google Drive / Proof URL is required for "${q.title}".`,
+          message: `Google Drive / Proof link for "${q.title}" must be a valid http:// or https:// URL.`,
         });
       }
 
@@ -116,8 +116,8 @@ export const submitPOTW = async (req, res, next) => {
         timeComplexity: submitted.timeComplexity.trim(),
         spaceComplexity: submitted.spaceComplexity.trim(),
         platform: submitted.platform || 'LeetCode',
-        submissionLink: submitted.submissionLink.trim(),
-        driveLink: submitted.driveLink.trim(),
+        submissionLink: submitted.submissionLink?.trim() || '',
+        driveLink: submitted.driveLink?.trim() || '',
         score: 0,
         maxScore: q.maxScore,
         status: 'pending',

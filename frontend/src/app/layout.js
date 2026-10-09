@@ -8,6 +8,11 @@ export const metadata = {
   description:
     'ROUNDCode is the private competitive coding and skill-development platform for Round Table Delhi Technological University (DTU) members. Weekly Problem of the Week (POTW), difficulty scoring, ratings, and developer profiles.',
   keywords: 'Round Table DTU, DTU, coding, POTW, LeetCode, Codeforces, developer platform',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({ children }) {

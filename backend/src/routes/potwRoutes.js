@@ -14,8 +14,8 @@ const router = express.Router();
 
 // Public / Semi-public routes (or authenticated members)
 router.get('/current', getCurrentPOTW);
-router.get('/', getAllPOTWs);
-router.get('/:id', getPOTWById);
+router.get('/', authenticateUser, getAllPOTWs);
+router.get('/:id', authenticateUser, getPOTWById);
 
 // Admin-only management routes
 router.post('/', authenticateUser, requireAdmin, createPOTW);

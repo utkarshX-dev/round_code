@@ -34,6 +34,29 @@ const INITIAL_PROBLEM_FORM = {
   driveLink: '',
 };
 
+const isValidHttpUrl = (value) => {
+  if (!value?.trim()) return true;
+
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const hasSolutionCode = (code) => {
+  if (!code?.trim()) return false;
+
+  const codeWithoutComments = code
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/.*$/gm, '')
+    .replace(/^\s*#(?!include|define|if|ifdef|ifndef|else|elif|endif).*$/gm, '')
+    .trim();
+
+  return codeWithoutComments.length > 0;
+};
+
 export default function POTWPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -49,12 +72,14 @@ export default function POTWPage() {
     { ...INITIAL_PROBLEM_FORM },
     { ...INITIAL_PROBLEM_FORM },
   ]);
+  const [completedProblems, setCompletedProblems] = useState([false, false, false]);
 
   const [activeTab, setActiveTab] = useState(0); // 0 = Easy, 1 = Medium, 2 = Hard
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [fieldErrors, setFieldErrors] = useState([{}, {}, {}]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -107,22 +132,67 @@ export default function POTWPage() {
       next[index] = { ...next[index], [field]: value };
       return next;
     });
+
+    if (['code', 'timeComplexity', 'spaceComplexity', 'language', 'platform'].includes(field)) {
+      setCompletedProblems((prev) => {
+        const next = [...prev];
+        next[index] = false;
+        return next;
+      });
+
+      if (['code', 'timeComplexity', 'spaceComplexity'].includes(field)) {
+        setFieldErrors((prev) => {
+          const next = [...prev];
+          next[index] = { ...next[index], [field]: false };
+          return next;
+        });
+      }
+    }
   };
 
   const isProblemCompleted = (p) => {
     return (
-      Boolean(p?.code?.trim()) &&
-      !isDefaultOrEmptySnippet(p.code) &&
+      hasSolutionCode(p?.code) &&
       Boolean(p?.timeComplexity?.trim()) &&
-      Boolean(p?.submissionLink?.trim()) &&
-      Boolean(p?.driveLink?.trim())
+      Boolean(p?.spaceComplexity?.trim())
     );
   };
 
   // Calculate filled problems progress
-  const completedCount = formData.filter(isProblemCompleted).length;
+  const completedCount = completedProblems.filter(Boolean).length;
 
   const isDeadlinePassed = activePotw && new Date() >= new Date(activePotw.deadline);
+
+  const markProblemComplete = (index) => {
+    setError('');
+    setActiveTab(index);
+
+    if (!isProblemCompleted(formData[index])) {
+      const problem = formData[index];
+      const errors = {
+        code: !hasSolutionCode(problem?.code),
+        timeComplexity: !problem?.timeComplexity?.trim(),
+        spaceComplexity: !problem?.spaceComplexity?.trim(),
+      };
+      setFieldErrors((prev) => {
+        const next = [...prev];
+        next[index] = errors;
+        return next;
+      });
+      return;
+    }
+
+    setFieldErrors((prev) => {
+      const next = [...prev];
+      next[index] = {};
+      return next;
+    });
+    setCompletedProblems((prev) => {
+      const next = [...prev];
+      next[index] = true;
+      return next;
+    });
+  };
 
   const handleSubmit = async () => {
     setError('');
@@ -136,7 +206,33 @@ export default function POTWPage() {
     }
 
     if (completedCount < 3) {
-      setError('You must complete all 3 problems before submitting the challenge.');
+      const incompleteProblems = completedProblems
+        .map((completed, index) => (!completed ? index + 1 : null))
+        .filter(Boolean);
+      const errorsByProblem = formData.map((problem, index) => {
+        if (completedProblems[index]) return {};
+
+        return {
+          code: !problem?.code?.trim() || isDefaultOrEmptySnippet(problem.code),
+          timeComplexity: !problem?.timeComplexity?.trim(),
+          spaceComplexity: !problem?.spaceComplexity?.trim(),
+        };
+      });
+      const firstIncompleteProblem = incompleteProblems[0] - 1;
+      setFieldErrors(errorsByProblem);
+      setActiveTab(firstIncompleteProblem);
+      return;
+    }
+
+    const invalidLinkProblem = formData.findIndex(
+      (problem) => !isValidHttpUrl(problem.submissionLink) || !isValidHttpUrl(problem.driveLink)
+    );
+    if (invalidLinkProblem >= 0) {
+      const problemName = activePotw.problems[invalidLinkProblem]?.title || `Question ${invalidLinkProblem + 1}`;
+      setError(
+        `The optional links for "${problemName}" must be valid http:// or https:// URLs, or leave them empty.`
+      );
+      setActiveTab(invalidLinkProblem);
       return;
     }
 
@@ -239,6 +335,9 @@ export default function POTWPage() {
                   <div className="text-xl font-black font-mono text-cyan-400">
                     {completedCount} / 3 Completed
                   </div>
+                  <span className="text-[10px] text-slate-500 block mt-1">
+                    Code + time + space required
+                  </span>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
                     <div
                       className="bg-cyan-400 h-full transition-all duration-300"
@@ -297,6 +396,16 @@ export default function POTWPage() {
 
                       {/* Problem Statement details */}
                       <p className="text-xs text-slate-400 leading-relaxed">{prob.statement}</p>
+                      {prob.link && (
+                        <a
+                          href={prob.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                          View Problem Link <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
 
                       {/* Code submitted */}
                       {subItem && (
@@ -360,8 +469,7 @@ export default function POTWPage() {
               {/* Question Navigation Tabs */}
               <div className="flex flex-wrap p-1.5 bg-[#090a0f] border border-[#202230] rounded-2xl gap-2">
                 {activePotw.problems.map((p, idx) => {
-                  const isFilled = isProblemCompleted(formData[idx]);
-
+                  const problemHasMissingDetails = !isProblemCompleted(formData[idx]);
                   return (
                     <button
                       key={p._id || idx}
@@ -370,11 +478,13 @@ export default function POTWPage() {
                       className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
                         activeTab === idx
                           ? 'bg-[#a3ff20] text-black shadow-sm'
+                          : problemHasMissingDetails && fieldErrors[idx] && Object.values(fieldErrors[idx]).some(Boolean)
+                            ? 'bg-rose-500/15 text-rose-300 border border-rose-500/60'
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                       }`}
                     >
                       <span>Q{idx + 1}: {p.difficulty}</span>
-                      {isFilled && <span className="text-black font-black text-xs">✓</span>}
+                      {completedProblems[idx] && <span className="text-black font-black text-xs">✓</span>}
                     </button>
                   );
                 })}
@@ -383,6 +493,14 @@ export default function POTWPage() {
               {/* Current Problem View & Code Input */}
               {activePotw.problems[activeTab] && (
                 <div className="space-y-5">
+                  {(() => {
+                    const currentProblem = formData[activeTab];
+                    const missingCode = !hasSolutionCode(currentProblem?.code);
+                    const missingTime = !currentProblem?.timeComplexity?.trim();
+                    const missingSpace = !currentProblem?.spaceComplexity?.trim();
+
+                    return (
+                      <>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl bg-[#090a0f] border border-[#202230]">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -394,6 +512,16 @@ export default function POTWPage() {
                       <p className="text-xs text-zinc-400 leading-relaxed">
                         {activePotw.problems[activeTab].statement}
                       </p>
+                      {activePotw.problems[activeTab].link && (
+                        <a
+                          href={activePotw.problems[activeTab].link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                          View Problem Link <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
                     </div>
                   </div>
 
@@ -420,9 +548,11 @@ export default function POTWPage() {
                   </div>
 
                   {/* Monaco Code Editor */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-2">
-                      Source Code Submission (Select Language & Paste Implementation)
+                  <div className={fieldErrors[activeTab]?.code && missingCode ? 'rounded-xl border border-rose-500/70' : ''}>
+                    <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${
+                      fieldErrors[activeTab]?.code && missingCode ? 'text-rose-300' : 'text-zinc-300'
+                    }`}>
+                      Source Code & Language * (Select Language & Paste Implementation)
                     </label>
                     <CodeEditor
                       value={formData[activeTab].code}
@@ -431,12 +561,17 @@ export default function POTWPage() {
                       onLanguageChange={(lang) => handleProblemChange(activeTab, 'language', lang)}
                       height="320px"
                     />
+                    {fieldErrors[activeTab]?.code && missingCode && (
+                      <p className="mt-1.5 text-[11px] text-rose-400">Required: add your solution code.</p>
+                    )}
                   </div>
 
                   {/* Complexity & Links Inputs */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
+                      <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${
+                        fieldErrors[activeTab]?.timeComplexity && missingTime ? 'text-rose-300' : 'text-zinc-300'
+                      }`}>
                         Time Complexity *
                       </label>
                       <input
@@ -445,12 +580,21 @@ export default function POTWPage() {
                         placeholder="e.g. O(n log n)"
                         value={formData[activeTab].timeComplexity}
                         onChange={(e) => handleProblemChange(activeTab, 'timeComplexity', e.target.value)}
-                        className="w-full bg-[#090a0f] border border-[#202230] rounded-2xl px-4 py-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#a3ff20] transition-colors"
+                        className={`w-full bg-[#090a0f] border rounded-2xl px-4 py-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors ${
+                          fieldErrors[activeTab]?.timeComplexity && missingTime
+                            ? 'border-rose-500 focus:border-rose-400'
+                            : 'border-[#202230] focus:border-[#a3ff20]'
+                        }`}
                       />
+                      {fieldErrors[activeTab]?.timeComplexity && missingTime && (
+                        <p className="mt-1.5 text-[11px] text-rose-400">Required: enter the time complexity.</p>
+                      )}
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
+                      <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${
+                        fieldErrors[activeTab]?.spaceComplexity && missingSpace ? 'text-rose-300' : 'text-zinc-300'
+                      }`}>
                         Space Complexity *
                       </label>
                       <input
@@ -459,13 +603,20 @@ export default function POTWPage() {
                         placeholder="e.g. O(n) or O(1)"
                         value={formData[activeTab].spaceComplexity}
                         onChange={(e) => handleProblemChange(activeTab, 'spaceComplexity', e.target.value)}
-                        className="w-full bg-[#090a0f] border border-[#202230] rounded-2xl px-4 py-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#a3ff20] transition-colors"
+                        className={`w-full bg-[#090a0f] border rounded-2xl px-4 py-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors ${
+                          fieldErrors[activeTab]?.spaceComplexity && missingSpace
+                            ? 'border-rose-500 focus:border-rose-400'
+                            : 'border-[#202230] focus:border-[#a3ff20]'
+                        }`}
                       />
+                      {fieldErrors[activeTab]?.spaceComplexity && missingSpace && (
+                        <p className="mt-1.5 text-[11px] text-rose-400">Required: enter the space complexity.</p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                        Coding Platform
+                        Coding Platform *
                       </label>
                       <select
                         value={formData[activeTab].platform}
@@ -483,11 +634,10 @@ export default function POTWPage() {
 
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                        External Submission Link *
+                        External Submission Link (Optional)
                       </label>
                       <input
                         type="url"
-                        required
                         placeholder="https://leetcode.com/submissions/detail/..."
                         value={formData[activeTab].submissionLink}
                         onChange={(e) => handleProblemChange(activeTab, 'submissionLink', e.target.value)}
@@ -497,11 +647,10 @@ export default function POTWPage() {
 
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                        Google Drive Proof Link (Screenshots / Verification) *
+                        Google Drive Proof Link (Screenshots / Verification) (Optional)
                       </label>
                       <input
                         type="url"
-                        required
                         placeholder="https://drive.google.com/file/d/..."
                         value={formData[activeTab].driveLink}
                         onChange={(e) => handleProblemChange(activeTab, 'driveLink', e.target.value)}
@@ -532,8 +681,14 @@ export default function POTWPage() {
                     ) : (
                       <button
                         type="button"
-                        onClick={() => setShowConfirmModal(true)}
-                        disabled={completedCount < 3 || isDeadlinePassed}
+                        onClick={() => {
+                          if (completedCount < 3) {
+                            handleSubmit();
+                          } else {
+                            setShowConfirmModal(true);
+                          }
+                        }}
+                        disabled={isDeadlinePassed || submitting}
                         className="btn-tactile-lime flex items-center gap-2 disabled:opacity-40"
                       >
                         <Send className="w-3.5 h-3.5" />
@@ -541,6 +696,22 @@ export default function POTWPage() {
                       </button>
                     )}
                   </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => markProblemComplete(activeTab)}
+                      className={`text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border transition-colors ${
+                        completedProblems[activeTab]
+                          ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                          : 'border-[#a3ff20]/40 text-[#a3ff20] hover:bg-[#a3ff20]/10'
+                      }`}
+                    >
+                      {completedProblems[activeTab] ? 'Question Complete ✓' : 'Mark Question Complete'}
+                    </button>
+                  </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>

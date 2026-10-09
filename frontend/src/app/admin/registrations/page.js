@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Calendar,
   Key,
+  Loader2,
 } from 'lucide-react';
 
 export default function RegistrationsManagementPage() {
@@ -30,6 +31,7 @@ export default function RegistrationsManagementPage() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [approvedResult, setApprovedResult] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
   const [msg, setMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function RegistrationsManagementPage() {
 
   const handleApprove = async (reg) => {
     setActionLoading(true);
+    setApprovingId(reg._id);
     setMsg({ type: '', text: '' });
     try {
       const res = await api.patch(`/registrations/${reg._id}/approve`);
@@ -71,7 +74,7 @@ export default function RegistrationsManagementPage() {
           tempPassword: res.data?.tempPasswordDev,
         });
         setMsg({ type: 'success', text: `Approved registration for ${reg.name}!` });
-        fetchRegistrations(tab);
+        await fetchRegistrations(tab);
       } else {
         setMsg({ type: 'error', text: res.message || 'Approval failed.' });
       }
@@ -79,6 +82,7 @@ export default function RegistrationsManagementPage() {
       setMsg({ type: 'error', text: err.message || 'Approval failed.' });
     } finally {
       setActionLoading(false);
+      setApprovingId(null);
     }
   };
 
@@ -228,8 +232,17 @@ export default function RegistrationsManagementPage() {
                     disabled={actionLoading}
                     className="flex-1 py-2 rounded-xl text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 transition-colors flex items-center justify-center gap-1"
                   >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Approve & Email</span>
+                    {approvingId === reg._id ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Approving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve & Email</span>
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={() => {

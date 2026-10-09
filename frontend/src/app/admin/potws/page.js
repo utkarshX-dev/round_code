@@ -15,12 +15,14 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  Pencil,
 } from 'lucide-react';
 
 const INITIAL_PROBLEMS = [
   {
     title: '',
     statement: '',
+    link: '',
     difficulty: 'easy',
     maxScore: 1,
     constraints: '1 <= n <= 10^5',
@@ -54,18 +56,20 @@ export default function AdminPOTWManagementPage() {
   const [potws, setPotws] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
     weekNumber: '',
     title: '',
     description: '',
     publishAt: '',
-    deadline: '',
     status: 'draft',
     problems: INITIAL_PROBLEMS,
   });
 
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -81,6 +85,12 @@ export default function AdminPOTWManagementPage() {
       const res = await api.get('/potws');
       if (res.success) {
         setPotws(res.data || []);
+        setFormData((prev) => ({
+          ...prev,
+          weekNumber: prev.weekNumber || String(
+            (res.data || []).reduce((highest, potw) => Math.max(highest, potw.weekNumber || 0), 0) + 1
+          ),
+        }));
       }
     } catch (err) {
       console.error(err);
@@ -101,28 +111,30 @@ export default function AdminPOTWManagementPage() {
     });
   };
 
-  const handleCreatePOTW = async (e) => {
+  const handleSavePOTW = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMsg({ type: '', text: '' });
 
     try {
-      // Validate dates
-      if (new Date(formData.deadline) <= new Date(formData.publishAt)) {
-        setMsg({ type: 'error', text: 'Deadline must be later than the publish date.' });
-        setSaving(false);
-        return;
-      }
-
-      const res = await api.post('/potws', {
+      const payload = {
         ...formData,
         weekNumber: Number(formData.weekNumber),
-      });
+      };
+      const res = editingId
+        ? await api.patch(`/potws/${editingId}`, payload)
+        : await api.post('/potws', payload);
 
       if (res.success) {
-        setMsg({ type: 'success', text: `POTW #${formData.weekNumber} created successfully!` });
+        setMsg({
+          type: 'success',
+          text: editingId
+            ? `POTW #${formData.weekNumber} updated successfully!`
+            : `POTW #${formData.weekNumber} created successfully!`,
+        });
         setShowCreateForm(false);
-        fetchPOTWs();
+        setEditingId(null);
+        await fetchPOTWs();
       } else {
         setMsg({ type: 'error', text: res.message || 'Failed to create POTW.' });
       }
@@ -134,18 +146,79 @@ export default function AdminPOTWManagementPage() {
   };
 
   const handleDeletePOTW = async (id) => {
-    if (!confirm('Are you sure you want to delete this POTW?')) return;
+    setDeleting(true);
     try {
       const res = await api.delete(`/potws/${id}`);
       if (res.success) {
         setMsg({ type: 'success', text: 'POTW deleted successfully.' });
-        fetchPOTWs();
+        setDeleteTarget(null);
+        await fetchPOTWs();
       } else {
         setMsg({ type: 'error', text: res.message || 'Failed to delete POTW.' });
       }
     } catch (err) {
       setMsg({ type: 'error', text: err.message || 'Failed to delete POTW.' });
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handlePublishPOTW = async (potw) => {
+    setSaving(true);
+    setMsg({ type: '', text: '' });
+    try {
+      const res = await api.patch(`/potws/${potw._id}`, {
+        status: 'active',
+        publishAt: new Date().toISOString(),
+      });
+      if (res.success) {
+        setMsg({ type: 'success', text: `POTW #${potw.weekNumber} published successfully.` });
+        await fetchPOTWs();
+      } else {
+        setMsg({ type: 'error', text: res.message || 'Failed to publish POTW.' });
+      }
+    } catch (err) {
+      setMsg({ type: 'error', text: err.message || 'Failed to publish POTW.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleCreateForm = () => {
+    if (showCreateForm) {
+      setEditingId(null);
+    } else {
+      const nextWeek = potws.reduce(
+        (highest, potw) => Math.max(highest, potw.weekNumber || 0),
+        0
+      ) + 1;
+      setFormData((prev) => ({
+        ...prev,
+        weekNumber: String(nextWeek),
+        status: 'draft',
+        publishAt: '',
+      }));
+    }
+    setShowCreateForm((open) => !open);
+  };
+
+  const handleEditPOTW = (potw) => {
+    setEditingId(potw._id);
+    setFormData({
+      weekNumber: String(potw.weekNumber),
+      title: potw.title || '',
+      description: potw.description || '',
+      publishAt: potw.publishAt
+        ? new Date(potw.publishAt).toISOString().slice(0, 16)
+        : '',
+      status: potw.status === 'active' ? 'active' : 'draft',
+      problems: (potw.problems || []).map((problem) => ({
+        ...problem,
+        link: problem.link || '',
+      })),
+    });
+    setShowCreateForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (authLoading) return <LoadingSpinner text="Checking credentials..." />;
@@ -166,7 +239,7 @@ export default function AdminPOTWManagementPage() {
         </div>
 
         <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
+          onClick={toggleCreateForm}
           className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-colors flex items-center gap-1.5 self-start sm:self-auto shadow-md shadow-cyan-500/20"
         >
           <Plus className="w-4 h-4" />
@@ -186,13 +259,17 @@ export default function AdminPOTWManagementPage() {
         </div>
       )}
 
-      {/* POTW Creation Form (Section 84) */}
+      {/* POTW Creation/Edit Form */}
       {showCreateForm && (
-        <form onSubmit={handleCreatePOTW} className="glass-panel p-6 sm:p-8 rounded-2xl border border-cyan-500/30 space-y-6">
+        <form onSubmit={handleSavePOTW} className="glass-panel p-6 sm:p-8 rounded-2xl border border-cyan-500/30 space-y-6">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>Author New POTW (Exactly 3 Problems Required)</span>
+              <span>
+                {editingId
+                  ? 'Edit POTW (Exactly 3 Problems Required)'
+                  : 'Author New POTW (Exactly 3 Problems Required)'}
+              </span>
             </h3>
             <span className="text-xs font-mono text-cyan-400">Total: 6.0 Pts</span>
           </div>
@@ -200,15 +277,15 @@ export default function AdminPOTWManagementPage() {
           {/* Schedule metadata */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Week Number *</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                Week Number (Assigned Automatically)
+              </label>
               <input
                 type="number"
-                required
+                readOnly
                 min="1"
-                placeholder="e.g. 13"
                 value={formData.weekNumber}
-                onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-400 font-mono cursor-not-allowed"
               />
             </div>
 
@@ -236,40 +313,13 @@ export default function AdminPOTWManagementPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 font-mono">
-                Publish Date & Time *
-              </label>
-              <input
-                type="datetime-local"
-                required
-                value={formData.publishAt}
-                onChange={(e) => setFormData({ ...formData, publishAt: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 font-mono">
-                Submission Deadline *
-              </label>
-              <input
-                type="datetime-local"
-                required
-                value={formData.deadline}
-                onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5">Initial Status</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-500"
               >
-                <option value="draft">Draft (Private)</option>
-                <option value="scheduled">Scheduled</option>
+                <option value="draft">Draft (Private — Publish Later)</option>
                 <option value="active">Active (Live Immediately)</option>
               </select>
             </div>
@@ -316,6 +366,19 @@ export default function AdminPOTWManagementPage() {
                       />
                     </div>
 
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Problem Link
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://leetcode.com/problems/..."
+                        value={prob.link}
+                        onChange={(e) => handleProblemChange(idx, 'link', e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+
                     <div>
                       <label className="block text-xs font-medium text-slate-300 mb-1 font-mono">
                         Constraints
@@ -358,7 +421,7 @@ export default function AdminPOTWManagementPage() {
               disabled={saving}
               className="px-6 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 transition-all shadow-md shadow-cyan-500/20"
             >
-              {saving ? 'Creating...' : 'Save & Publish POTW'}
+              {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Save POTW'}
             </button>
           </div>
         </form>
@@ -393,20 +456,41 @@ export default function AdminPOTWManagementPage() {
                     <StatusBadge status={potw.status} />
                   </td>
                   <td className="py-3.5 px-6 text-slate-400">
-                    {new Date(potw.publishAt).toLocaleDateString()}
+                    {potw.publishAt ? new Date(potw.publishAt).toLocaleDateString() : '—'}
                   </td>
                   <td className="py-3.5 px-6 text-amber-400">
-                    {new Date(potw.deadline).toLocaleDateString()}
+                    {potw.deadline ? new Date(potw.deadline).toLocaleDateString() : '—'}
                   </td>
                   <td className="py-3.5 px-6 text-right font-sans">
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePOTW(potw._id)}
-                      className="text-slate-500 hover:text-rose-400 p-1"
-                      title="Delete POTW"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditPOTW(potw)}
+                        className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 text-[10px] font-semibold uppercase"
+                        title="Edit POTW"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                      {potw.status === 'draft' && (
+                        <button
+                          type="button"
+                          onClick={() => handlePublishPOTW(potw)}
+                          disabled={saving}
+                          className="text-emerald-400 hover:text-emerald-300 text-[10px] font-semibold uppercase disabled:opacity-50"
+                        >
+                          Publish
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(potw)}
+                        className="text-slate-500 hover:text-rose-400 p-1"
+                        title="Delete POTW"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -414,6 +498,47 @@ export default function AdminPOTWManagementPage() {
           </table>
         </div>
       </div>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="max-w-md w-full glass-panel p-6 sm:p-8 rounded-2xl border border-rose-500/30 shadow-2xl space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 flex-shrink-0">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Delete POTW?</h3>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  This will permanently delete{' '}
+                  <strong className="text-slate-200">
+                    POTW #{deleteTarget.weekNumber}: {deleteTarget.title}
+                  </strong>
+                  . This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white glass-panel disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletePOTW(deleteTarget._id)}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-500 hover:bg-rose-400 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete POTW'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

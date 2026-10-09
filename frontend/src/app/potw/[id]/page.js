@@ -155,6 +155,17 @@ export default function SinglePOTWPage() {
 
               {/* Statement & constraints */}
               <p className="text-xs text-zinc-400 leading-relaxed">{prob.statement}</p>
+              {prob.link && (
+                <a
+                  href={prob.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  View Problem Link
+                </a>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-[#090a0f] border border-[#202230] text-xs">
                 <div>

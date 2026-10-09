@@ -11,6 +11,11 @@ const problemSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Problem statement is required'],
     },
+    link: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     difficulty: {
       type: String,
       enum: ['easy', 'medium', 'hard'],
@@ -72,14 +77,12 @@ const potwSchema = new mongoose.Schema(
     },
     publishAt: {
       type: Date,
-      required: [true, 'Publish date is required'],
     },
     deadline: {
       type: Date,
-      required: [true, 'Deadline is required'],
       validate: {
         validator: function (deadline) {
-          return deadline > this.publishAt;
+          return !deadline || !this.publishAt || deadline > this.publishAt;
         },
         message: 'Deadline must be later than publish date',
       },

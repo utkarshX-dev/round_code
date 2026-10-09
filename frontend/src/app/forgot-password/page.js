@@ -9,7 +9,7 @@ import RoundTableLogo from '@/components/common/RoundTableLogo';
 export default function ForgotPasswordPage() {
   const [emailInput, setEmailInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null); // { type, message, devResetLink }
+  const [status, setStatus] = useState(null); // { type, message }
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
@@ -24,8 +24,6 @@ export default function ForgotPasswordPage() {
         setStatus({
           type: res.statusType || 'dispatched',
           message: res.message,
-          devLink: res.devResetLink,
-          mailError: res.mailError,
         });
       }
     } catch (err) {
@@ -65,17 +63,6 @@ export default function ForgotPasswordPage() {
               <span>Link Dispatched</span>
             </div>
             <p className="leading-relaxed text-zinc-300">{status.message}</p>
-            <div className="mt-2.5 pt-2.5 border-t border-emerald-500/20 text-[11px] text-zinc-400">
-              💡 <strong>Tip:</strong> If not visible in your inbox within 2 minutes, make sure to check your <strong>Spam / Junk</strong> folder or <strong>Promotions</strong> tab.
-            </div>
-            {status.devLink && (
-              <div className="mt-3 p-3 rounded-xl bg-[#090a0f] border border-[#202230] text-[11px] font-mono break-all">
-                <span className="text-zinc-500 block mb-1">Development Direct Reset Link:</span>
-                <Link href={status.devLink} className="text-[#a3ff20] underline hover:text-[#b8ff3d]">
-                  {status.devLink}
-                </Link>
-              </div>
-            )}
           </div>
         )}
 

@@ -219,7 +219,7 @@ export const forgotPassword = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         statusType: 'dispatched',
-        message: 'If an active account exists with that email, a password reset link has been dispatched. Please check your inbox and Spam/Junk folder.',
+        message: 'If an active account exists with that email, a password reset link has been dispatched.',
       });
     }
 
@@ -259,10 +259,7 @@ export const forgotPassword = async (req, res, next) => {
     res.status(200).json({
       success: true,
       statusType: 'dispatched',
-      message: `Password reset link dispatched to ${user.personalEmail}. Please check your inbox and Spam/Junk folder.`,
-      // In non-production, return preview link to ease testing
-      devResetLink: process.env.NODE_ENV !== 'production' ? resetLink : undefined,
-      mailError: process.env.NODE_ENV !== 'production' && !emailResult?.success ? emailResult?.error : undefined,
+      message: `Password reset link dispatched to ${user.personalEmail}.`,
     });
   } catch (error) {
     next(error);
@@ -317,9 +314,8 @@ export const resetPassword = async (req, res, next) => {
     user.password = newPassword;
     await user.save();
 
-    // Invalidate token
-    resetRecord.used = true;
-    await resetRecord.save();
+    // Remove the token immediately after successful use.
+    await PasswordResetToken.deleteOne({ _id: resetRecord._id });
 
     res.status(200).json({
       success: true,

@@ -42,7 +42,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
   console.log(`To: ${to}`);
   console.log(`Subject: ${subject}`);
   console.log(`From: ${from}`);
-  console.log(`Content:\n${text}`);
+  console.log('Content: [redacted]');
   console.log(`=================================================================\n`);
 
   if (transporter) {
