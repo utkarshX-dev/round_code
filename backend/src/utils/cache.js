@@ -2,6 +2,7 @@ import { isRedisReady, redisClient } from '../config/redis.js';
 
 const leaderboardCacheKeys = [
   'leaderboard:all-time',
+  'leaderboard:all-time:v2',
   'leaderboard:weekly',
 ];
 const inFlightLoads = new Map();
@@ -44,7 +45,7 @@ export async function getOrSetCache(key, loader, ttlSeconds) {
   }
 
   try {
-    await redisClient.set(key, JSON.stringify(value), { EX: ttlSeconds });
+    await redisClient.set(key, JSON.stringify(value), { ex: ttlSeconds });
   } catch (error) {
     console.error(`Redis cache write failed for "${key}":`, error.message);
   }

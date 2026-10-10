@@ -21,7 +21,7 @@ const addDenseRanks = (entries, getScore) => {
 // GET /api/leaderboard/all-time
 export const getAllTimeLeaderboard = async (req, res, next) => {
   try {
-    const response = await getOrSetCache('leaderboard:all-time', async () => {
+    const response = await getOrSetCache('leaderboard:all-time:v2', async () => {
       const members = await User.find({
         role: 'member',
         accountStatus: 'active',
