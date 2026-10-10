@@ -26,7 +26,11 @@ export const firebaseLogin = async (req, res, next) => {
 
     const email = decoded.email.trim().toLowerCase();
     let user = await User.findOne({
-      $or: [{ firebaseUid: decoded.uid }, { personalEmail: email }],
+      $or: [
+        { firebaseUid: decoded.uid },
+        { personalEmail: email },
+        { dtuEmail: email },
+      ],
     });
 
     if (user) {
