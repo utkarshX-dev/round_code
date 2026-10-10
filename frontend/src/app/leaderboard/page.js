@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import UserAvatar from '@/components/common/UserAvatar';
 import { Trophy, ArrowUpRight } from 'lucide-react';
 
 export default function LeaderboardPage() {
@@ -35,9 +34,6 @@ export default function LeaderboardPage() {
   useEffect(() => {
     fetchLeaderboard(tab);
   }, [tab]);
-
-  const topThree = data.slice(0, 3);
-  const remaining = data.slice(3);
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto px-4 py-4">
@@ -106,69 +102,8 @@ export default function LeaderboardPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Top 3 Podium */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-            {topThree.map((item, index) => {
-              const userObj = item.user || item;
-              const rank = item.rank;
-              const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉';
-              const podiumBorder =
-                rank === 1
-                  ? 'border-[#a3ff20] bg-[#14151e] shadow-lg shadow-[#a3ff20]/10'
-                  : rank === 2
-                  ? 'border-zinc-700 bg-[#14151e]'
-                  : 'border-zinc-800 bg-[#14151e]';
-
-              const scoreValue =
-                tab === 'all-time'
-                  ? `${userObj.rating} pts`
-                  : tab === 'weekly'
-                  ? `${item.score} / 6.0`
-                  : `${item.monthlyScore} pts`;
-
-              return (
-                <div
-                  key={userObj._id || index}
-                  className={`p-6 rounded-3xl border ${podiumBorder} relative flex flex-col justify-between`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-3xl">{medal}</span>
-                    <span className="text-xs font-black text-[#a3ff20] uppercase">
-                      RANK #{rank}
-                    </span>
-                  </div>
-
-                  <div>
-                    <UserAvatar user={userObj} size="md" className="mb-3" />
-                    <h3 className="text-base font-bold text-white mb-0.5">{userObj.name}</h3>
-                    <p className="text-xs text-zinc-400 mb-4">
-                      {userObj.branch || 'DTU'} • {userObj.batch || 'Batch'}
-                    </p>
-                    <div className="p-3.5 rounded-2xl bg-[#0b0c10] border border-zinc-800 flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">
-                        {tab === 'all-time' ? 'Rating' : tab === 'weekly' ? 'POTW Score' : 'Monthly Score'}
-                      </span>
-                      <span className="text-sm font-black text-[#a3ff20]">
-                        {scoreValue}
-                      </span>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/members/${userObj._id}`}
-                    className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white hover:text-[#a3ff20] font-bold transition-colors"
-                  >
-                    <span>View Profile</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-[#a3ff20]" />
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Ranks 4+ Table View */}
-          {remaining.length > 0 && (
-            <div className="bg-[#14151e] rounded-3xl border border-zinc-800 overflow-hidden">
+          {/* Complete rating-sorted standings */}
+          <div className="bg-[#14151e] rounded-3xl border border-zinc-800 overflow-hidden">
               <div className="px-6 py-4 border-b border-zinc-800">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Full Standings</h3>
               </div>
@@ -187,7 +122,7 @@ export default function LeaderboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800">
-                    {remaining.map((item) => {
+                    {data.map((item) => {
                       const userObj = item.user || item;
                       const scoreValue =
                         tab === 'all-time'
@@ -225,8 +160,7 @@ export default function LeaderboardPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
     </div>
