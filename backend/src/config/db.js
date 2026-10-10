@@ -1,7 +1,15 @@
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 
 let mongoMemoryServer = null;
+let MongoMemoryServer = null;
+
+const getMongoMemoryServer = async () => {
+  if (MongoMemoryServer) return MongoMemoryServer;
+
+  const module = await import("mongodb-memory-server");
+  MongoMemoryServer = module.MongoMemoryServer;
+  return MongoMemoryServer;
+};
 
 export const connectDB = async () => {
   try {
@@ -22,7 +30,8 @@ export const connectDB = async () => {
         "No external MONGO_URI specified. Starting in-memory MongoDB..."
       );
 
-      mongoMemoryServer = await MongoMemoryServer.create();
+      const MemoryServer = await getMongoMemoryServer();
+      mongoMemoryServer = await MemoryServer.create();
 
       const memoryUri = mongoMemoryServer.getUri();
 
@@ -75,7 +84,8 @@ export const connectDB = async () => {
       try {
         console.log("Trying development in-memory MongoDB...");
 
-        mongoMemoryServer = await MongoMemoryServer.create();
+        const MemoryServer = await getMongoMemoryServer();
+        mongoMemoryServer = await MemoryServer.create();
 
         const fallbackUri = mongoMemoryServer.getUri();
 
