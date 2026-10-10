@@ -57,6 +57,8 @@ const registrationRequestSchema = new mongoose.Schema(
 
 // Index for easy lookups
 registrationRequestSchema.index({ status: 1, createdAt: -1 });
+registrationRequestSchema.index({ dtuEmail: 1 });
+registrationRequestSchema.index({ personalEmail: 1 });
 
 const RegistrationRequest = mongoose.model('RegistrationRequest', registrationRequestSchema);
 export default RegistrationRequest;

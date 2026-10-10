@@ -3,14 +3,13 @@ import Notification from '../models/Notification.js';
 // GET /api/notifications
 export const getMyNotifications = async (req, res, next) => {
   try {
-    const notifications = await Notification.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .limit(50);
-
-    const unreadCount = await Notification.countDocuments({
-      userId: req.user.id,
-      isRead: false,
-    });
+    const [notifications, unreadCount] = await Promise.all([
+      Notification.find({ userId: req.user.id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      Notification.countDocuments({ userId: req.user.id, isRead: false }),
+    ]);
 
     res.status(200).json({
       success: true,

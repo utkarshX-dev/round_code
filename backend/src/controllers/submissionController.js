@@ -1,10 +1,10 @@
 import validator from 'validator';
 import Submission from '../models/Submission.js';
 import POTW from '../models/POTW.js';
-import User from '../models/User.js';
 import RatingHistory from '../models/RatingHistory.js';
 import Notification from '../models/Notification.js';
 import AuditLog from '../models/AuditLog.js';
+import { awardBadges, notifyUser } from '../utils/engagement.js';
 
 // Helper to validate URLs
 const isValidUrl = (url) => {
@@ -314,13 +314,25 @@ export const reviewSubmission = async (req, res, next) => {
     });
 
     // In-app notification as per Section 40
-    await Notification.create({
+    const lastReviewed = await Submission.findOne({
       userId: member._id,
+      status: 'reviewed',
+      _id: { $ne: submission._id },
+      reviewedAt: { $lt: submission.reviewedAt },
+    }).sort({ reviewedAt: -1 }).select('reviewedAt');
+    const withinWeeklyWindow = lastReviewed
+      && submission.reviewedAt.getTime() - new Date(lastReviewed.reviewedAt).getTime() <= 14 * 24 * 60 * 60 * 1000;
+    member.currentStreak = withinWeeklyWindow ? (member.currentStreak || 0) + 1 : 1;
+    member.longestStreak = Math.max(member.longestStreak || 0, member.currentStreak);
+    await member.save();
+    await notifyUser({
+      user: member,
       type: 'review',
       title: `POTW #${submission.potwId.weekNumber} Reviewed`,
-      message: `You earned ${calculatedTotalScore}/6 points this week. Your rating changed from ${previousRating} → ${newRating}.`,
+      message: `You earned ${calculatedTotalScore}/6 points this week. Your rating changed from ${previousRating} → ${newRating}. Current streak: ${member.currentStreak} week${member.currentStreak === 1 ? '' : 's'}.`,
       link: `/potw/${submission.potwId._id}`,
     });
+    await awardBadges(member, { perfectScore: calculatedTotalScore === 6 });
 
     // Log admin audit action
     await AuditLog.create({
@@ -380,8 +392,8 @@ export const reopenSubmission = async (req, res, next) => {
     });
     await submission.save();
 
-    await Notification.create({
-      userId: submission.userId._id,
+    await notifyUser({
+      user: submission.userId,
       type: 'potw',
       title: `Submission Reopened: POTW #${submission.potwId.weekNumber}`,
       message: `An admin has reopened your submission for modifications. Reason: ${reopenReason}`,

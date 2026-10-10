@@ -10,6 +10,7 @@
     "seed": "node src/seeds/seed.js",
     "db:reset": "node scripts/resetDB.js",
     "db:init": "node scripts/resetDB.js",
+    "db:indexes": "node scripts/syncIndexes.js",
     "test": "node src/tests/runTests.js",
     "test:db": "node scripts/testMongo.js"
   },
@@ -25,6 +26,8 @@
   "dependencies": {
     "@upstash/redis": "^1.39.0",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.11.0",
+    "compression": "^1.8.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

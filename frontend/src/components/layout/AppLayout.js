@@ -24,10 +24,10 @@ export default function AppLayout({ children }) {
         {showSidebar ? (
           <div className="flex gap-6 items-start">
             <Sidebar />
-            <div className="flex-1 min-w-0 pb-16 md:pb-0">{children}</div>
+            <div key={pathname} className="flex-1 min-w-0 pb-16 md:pb-0 page-transition">{children}</div>
           </div>
         ) : (
-          <div className="w-full">{children}</div>
+          <div key={pathname} className="w-full page-transition">{children}</div>
         )}
       </main>
 

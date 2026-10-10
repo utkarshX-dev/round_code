@@ -71,6 +71,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    profilePhotoPublicId: {
+      type: String,
+      default: '',
+    },
     bio: {
       type: String,
       trim: true,
@@ -102,6 +106,22 @@ const userSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    currentStreak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    longestStreak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    badges: [
+      {
+        key: { type: String, required: true },
+        awardedAt: { type: Date, default: Date.now },
+      },
+    ],
     hasSeenTour: {
       type: Boolean,
       default: false,
@@ -119,6 +139,9 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
+
+userSchema.index({ role: 1, accountStatus: 1, rating: -1, potwsCompleted: -1, createdAt: 1 });
+userSchema.index({ role: 1, accountStatus: 1, branch: 1, batch: 1 });
 
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {

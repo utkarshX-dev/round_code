@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import UserAvatar from '@/components/common/UserAvatar';
+import { ClipLoader } from 'react-spinners';
 import { RoleBadge } from '@/components/common/Badge';
 import {
   User,
@@ -17,7 +19,15 @@ import {
   CheckCircle2,
   AlertCircle,
   FolderGit2,
+  Award,
+  Flame,
+  LockKeyhole,
+  Rocket,
+  Sparkles,
+  Target,
+  Zap,
   Trophy,
+  Camera,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -28,6 +38,14 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
+
+const PROFILE_BADGES = [
+  { key: 'first_submission', name: 'First Step', icon: Rocket, color: 'text-lime-300', bg: 'bg-lime-300/15', border: 'border-lime-300/30' },
+  { key: 'five_potws', name: 'Consistent Coder', icon: Target, color: 'text-cyan-300', bg: 'bg-cyan-300/15', border: 'border-cyan-300/30' },
+  { key: 'perfect_score', name: 'Perfect 6', icon: Sparkles, color: 'text-amber-300', bg: 'bg-amber-300/15', border: 'border-amber-300/30' },
+  { key: 'three_week_streak', name: 'On Fire', icon: Flame, color: 'text-orange-300', bg: 'bg-orange-300/15', border: 'border-orange-300/30' },
+  { key: 'four_week_streak', name: 'Unstoppable', icon: Zap, color: 'text-violet-300', bg: 'bg-violet-300/15', border: 'border-violet-300/30' },
+];
 
 export default function MyProfilePage() {
   const { user, refreshUser, loading: authLoading } = useAuth();
@@ -70,8 +88,14 @@ export default function MyProfilePage() {
   });
 
   const [ratingHistory, setRatingHistory] = useState([]);
+  const [achievements, setAchievements] = useState({
+    badges: [],
+    currentStreak: 0,
+    longestStreak: 0,
+  });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -85,6 +109,11 @@ export default function MyProfilePage() {
       try {
         const res = await api.get('/users/me');
         if (res.success && res.data) {
+          setAchievements({
+            badges: res.data.badges || [],
+            currentStreak: res.data.currentStreak || 0,
+            longestStreak: res.data.longestStreak || 0,
+          });
           setProfileData({
             name: res.data.name || '',
             bio: res.data.bio || '',
@@ -135,6 +164,40 @@ export default function MyProfilePage() {
       setMsg({ type: 'error', text: err.message || 'Failed to update profile.' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setMsg({ type: 'error', text: 'Choose a JPG, PNG, or WebP image.' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMsg({ type: 'error', text: 'Profile photos must be 5MB or smaller.' });
+      return;
+    }
+
+    setPhotoUploading(true);
+    setMsg({ type: '', text: '' });
+    try {
+      const image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Could not read that image.'));
+        reader.readAsDataURL(file);
+      });
+      const res = await api.post('/users/me/profile-photo', { image });
+      if (!res.success) throw new Error(res.message || 'Could not update profile photo.');
+      await refreshUser();
+      setMsg({ type: 'success', text: 'Profile photo updated successfully!' });
+    } catch (err) {
+      setMsg({ type: 'error', text: err.message || 'Could not update profile photo.' });
+    } finally {
+      setPhotoUploading(false);
     }
   };
 
@@ -239,16 +302,36 @@ export default function MyProfilePage() {
     <div className="space-y-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
-              Manage Profile
-            </h1>
-            <RoleBadge role={user.role} />
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <UserAvatar user={user} size="lg" />
+            <label
+              htmlFor="profile-photo"
+              className="absolute -right-2 -bottom-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-[#a3ff20]/50 bg-[#12131b] text-[#a3ff20] shadow-lg transition hover:bg-[#a3ff20] hover:text-black"
+              title="Change profile photo"
+            >
+              {photoUploading ? <ClipLoader color="currentColor" size={13} /> : <Camera className="h-4 w-4" />}
+            </label>
+            <input
+              id="profile-photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoChange}
+              disabled={photoUploading}
+              className="sr-only"
+            />
           </div>
-          <p className="text-sm text-zinc-400 mt-1">
-            Update your developer details, skills, handles, and showcase projects.
-          </p>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
+                Manage Profile
+              </h1>
+              <RoleBadge role={user.role} />
+            </div>
+            <p className="text-sm text-zinc-400 mt-1">
+              Update your developer details, skills, handles, and showcase projects.
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -391,6 +474,68 @@ export default function MyProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Achievement snapshot */}
+          <section className="relative overflow-hidden rounded-2xl border border-[#303346] bg-gradient-to-br from-[#171b23] via-[#12141d] to-[#0d1017] p-6 sm:p-8">
+            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-lime-300/10 blur-3xl" />
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-lime-300" />
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Achievements</h3>
+                </div>
+                <p className="mt-1 text-xs text-zinc-400">Your progress, streaks, and earned platform badges.</p>
+              </div>
+              <Link
+                href="/badges"
+                className="inline-flex items-center gap-2 self-start rounded-xl border border-lime-300/30 bg-lime-300/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-lime-300 transition hover:bg-lime-300/20 sm:self-auto"
+              >
+                Open achievement vault
+                <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
+
+            <div className="relative mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-xl border border-orange-300/25 bg-orange-300/10 p-3">
+                <Flame className="mb-2 h-4 w-4 text-orange-300" />
+                <p className="text-xl font-black text-white">{achievements.currentStreak}</p>
+                <p className="text-[9px] font-black uppercase tracking-wider text-orange-200/70">Current streak</p>
+              </div>
+              <div className="rounded-xl border border-violet-300/25 bg-violet-300/10 p-3">
+                <Zap className="mb-2 h-4 w-4 text-violet-300" />
+                <p className="text-xl font-black text-white">{achievements.longestStreak}</p>
+                <p className="text-[9px] font-black uppercase tracking-wider text-violet-200/70">Longest streak</p>
+              </div>
+              <div className="col-span-2 rounded-xl border border-lime-300/25 bg-lime-300/10 p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[9px] font-black uppercase tracking-wider text-lime-200/70">Badges unlocked</p>
+                  <p className="text-xl font-black text-white">{achievements.badges.length}<span className="text-zinc-500">/{PROFILE_BADGES.length}</span></p>
+                </div>
+                <div className="mt-3 flex gap-1">
+                  {PROFILE_BADGES.map((badge) => (
+                    <span key={badge.key} className={`h-1.5 flex-1 rounded-full ${achievements.badges.some((earned) => earned.key === badge.key) ? 'bg-lime-300' : 'bg-white/10'}`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative mt-5 flex flex-wrap gap-2">
+              {PROFILE_BADGES.map((badge) => {
+                const earned = achievements.badges.some((item) => item.key === badge.key);
+                const Icon = badge.icon;
+                return (
+                  <div
+                    key={badge.key}
+                    title={earned ? `${badge.name} unlocked` : `${badge.name} locked`}
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${earned ? `${badge.bg} ${badge.border} ${badge.color}` : 'border-[#252838] bg-[#0b0d13] text-zinc-600'}`}
+                  >
+                    {earned ? <Icon className="h-4 w-4" /> : <LockKeyhole className="h-3.5 w-3.5" />}
+                    <span className="text-[10px] font-bold">{badge.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
 
           {/* Skills Management */}
           <div className="bg-[#14151e] p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-4">

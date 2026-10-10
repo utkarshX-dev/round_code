@@ -51,6 +51,7 @@ const ratingHistorySchema = new mongoose.Schema(
 );
 
 ratingHistorySchema.index({ userId: 1, createdAt: -1 });
+ratingHistorySchema.index({ potwId: 1, userId: 1 });
 
 const RatingHistory = mongoose.model('RatingHistory', ratingHistorySchema);
 export default RatingHistory;

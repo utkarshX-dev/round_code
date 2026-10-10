@@ -22,7 +22,7 @@ const structuredData = {
   url: 'https://roundcode.vercel.app',
   logo: 'https://roundcode.vercel.app/roundtable-icon.png',
   description:
-    'ROUNDCode is a private competitive programming and skill-development platform for Round Table DTU members.',
+    'RoundCode is a private competitive programming and skill-development platform for Round Table DTU members.',
 };
 
 export default function LandingPage() {
@@ -67,7 +67,7 @@ export default function LandingPage() {
 
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#12131b] border border-[#202230] text-[#b4a2f8] text-xs font-bold uppercase tracking-wider mb-6">
           <RoundTableLogo size={24} className="rounded-full" showGlow={true} />
-          <span>RoundCode by Roundtable DTU</span>
+          <span>RoundCode by Round Table DTU</span>
         </div>
 
         {/* Punchy uppercase typography matching "TIME INTO SMART TIME" */}
@@ -160,7 +160,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How ROUNDCode Works Section */}
+      {/* How RoundCode Works Section */}
       <section aria-labelledby="progress-heading" className="w-full">
         <div className="text-center mb-10">
           <h2 id="progress-heading" className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">

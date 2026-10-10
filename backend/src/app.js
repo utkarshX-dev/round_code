@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
+import compression from "compression";
 import mongoose from "mongoose";
 
 import { connectDB } from "./config/db.js";
@@ -15,12 +16,14 @@ import userRoutes from "./routes/userRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
 console.log("🔥 ROUNDCode app.js loaded");
+app.set("trust proxy", 1);
 
 // =====================================================
 // SECURITY
@@ -52,8 +55,7 @@ app.use(
         return callback(null, true);
       }
 
-      // Currently allowing all origins to avoid blocking deployment.
-      return callback(null, true);
+      return callback(new Error("Origin is not allowed by CORS"));
     },
 
     credentials: true,
@@ -81,7 +83,7 @@ app.use(
 
 app.use(
   express.json({
-    limit: "10mb",
+    limit: "2mb",
   })
 );
 
@@ -93,6 +95,7 @@ app.use(
 );
 
 app.use(cookieParser());
+app.use(compression({ threshold: 1024 }));
 
 // =====================================================
 // RATE LIMITING
@@ -113,6 +116,13 @@ const limiter = rateLimit({
 });
 
 app.use("/api", limiter);
+app.use("/api/auth", rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: "Too many authentication attempts. Try again later." },
+}));
 
 // =====================================================
 // BASIC HEALTH CHECK
@@ -238,6 +248,8 @@ app.use(
   "/api/admin",
   adminRoutes
 );
+
+app.use("/api/posts", postRoutes);
 
 // =====================================================
 // ERROR HANDLER

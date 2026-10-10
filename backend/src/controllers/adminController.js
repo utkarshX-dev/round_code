@@ -10,48 +10,52 @@ import PasswordResetToken from '../models/PasswordResetToken.js';
 // GET /api/admin/dashboard (Admin & Super Admin)
 export const getAdminDashboardStats = async (req, res, next) => {
   try {
-    const totalMembers = await User.countDocuments({ role: 'member', accountStatus: 'active' });
-    const pendingRegistrations = await RegistrationRequest.countDocuments({ status: 'pending' });
-    const activePOTW = await POTW.findOne({ status: 'active' });
-    const pendingSubmissions = await Submission.countDocuments({ status: { $in: ['submitted', 'under_review'] } });
-
-    // Rating calculations
-    const ratingStats = await User.aggregate([
-      { $match: { role: 'member', accountStatus: 'active' } },
-      {
-        $group: {
-          _id: null,
-          avgRating: { $avg: '$rating' },
-          maxRating: { $max: '$rating' },
-          totalPOTWsCompleted: { $sum: '$potwsCompleted' },
+    const [
+      totalMembers,
+      pendingRegistrations,
+      activePOTW,
+      pendingSubmissions,
+      ratingStats,
+      recentRegistrations,
+      recentSubmissions,
+      recentReviews,
+      recentAudits,
+    ] = await Promise.all([
+      User.countDocuments({ role: 'member', accountStatus: 'active' }),
+      RegistrationRequest.countDocuments({ status: 'pending' }),
+      POTW.findOne({ status: 'active' }).lean(),
+      Submission.countDocuments({ status: { $in: ['submitted', 'under_review'] } }),
+      User.aggregate([
+        { $match: { role: 'member', accountStatus: 'active' } },
+        {
+          $group: {
+            _id: null,
+            avgRating: { $avg: '$rating' },
+            maxRating: { $max: '$rating' },
+            totalPOTWsCompleted: { $sum: '$potwsCompleted' },
+          },
         },
-      },
+      ]),
+      RegistrationRequest.find().sort({ createdAt: -1 }).limit(5).lean(),
+      Submission.find()
+        .populate('userId', 'name dtuEmail rating')
+        .populate('potwId', 'weekNumber title')
+        .sort({ submittedAt: -1 })
+        .limit(5)
+        .lean(),
+      Submission.find({ status: 'reviewed' })
+        .populate('userId', 'name dtuEmail')
+        .populate('potwId', 'weekNumber title')
+        .populate('reviewedBy', 'name')
+        .sort({ reviewedAt: -1 })
+        .limit(5)
+        .lean(),
+      AuditLog.find().sort({ createdAt: -1 }).limit(8).lean(),
     ]);
 
+    // Rating calculations
     const avgRating = ratingStats.length > 0 ? Math.round(ratingStats[0].avgRating * 10) / 10 : 0;
     const maxRating = ratingStats.length > 0 ? ratingStats[0].maxRating : 0;
-
-    // Recent items
-    const recentRegistrations = await RegistrationRequest.find()
-      .sort({ createdAt: -1 })
-      .limit(5);
-
-    const recentSubmissions = await Submission.find()
-      .populate('userId', 'name dtuEmail rating')
-      .populate('potwId', 'weekNumber title')
-      .sort({ submittedAt: -1 })
-      .limit(5);
-
-    const recentReviews = await Submission.find({ status: 'reviewed' })
-      .populate('userId', 'name dtuEmail')
-      .populate('potwId', 'weekNumber title')
-      .populate('reviewedBy', 'name')
-      .sort({ reviewedAt: -1 })
-      .limit(5);
-
-    const recentAudits = await AuditLog.find()
-      .sort({ createdAt: -1 })
-      .limit(8);
 
     // Participation percentage calculation for active POTW
     let participationRate = 0;

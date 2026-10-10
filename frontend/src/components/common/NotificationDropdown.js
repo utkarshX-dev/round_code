@@ -73,6 +73,7 @@ export default function NotificationDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-xl text-zinc-300 hover:text-white hover:bg-[#1a1c27] transition-colors focus:outline-none"
         aria-label="Notifications"
+        aria-expanded={isOpen}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -82,8 +83,14 @@ export default function NotificationDropdown() {
         )}
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-[#202230] bg-[#12131b] shadow-2xl z-50 overflow-hidden">
+      <div
+        aria-hidden={!isOpen}
+        className={`absolute left-0 mt-2 w-80 sm:w-96 rounded-2xl border border-[#202230] bg-[#12131b] shadow-2xl z-50 overflow-hidden origin-top-left transition-[opacity,transform,visibility] duration-200 ease-out ${
+          isOpen
+            ? 'visible translate-x-0 opacity-100'
+            : 'invisible -translate-x-2 opacity-0 pointer-events-none'
+        }`}
+      >
           <div className="flex items-center justify-between p-3.5 border-b border-[#202230] bg-[#0d0e14]">
             <div className="flex items-center gap-2">
               <span className="font-bold text-xs uppercase tracking-wider text-white">Notifications</span>
@@ -139,7 +146,6 @@ export default function NotificationDropdown() {
             )}
           </div>
         </div>
-      )}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <RoundTableLogo size={40} className="rounded-xl overflow-hidden bg-black p-0.5" />
           <span className="text-xl sm:text-2xl font-black tracking-tight uppercase">
-            ROUNDCode
+            RoundCode
           </span>
         </div>
 
@@ -49,7 +49,7 @@ export default function Footer() {
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-lg font-black text-white uppercase tracking-tight">
-                ROUND<span className="text-[#a3ff20]">Code</span>
+                Round<span className="text-[#a3ff20]">Code</span>
               </span>
               <span className="text-[10px] uppercase px-2 py-0.5 rounded-full bg-[#1e192e] text-[#b4a2f8] font-bold border border-[#b4a2f8]/30">
                 DTU

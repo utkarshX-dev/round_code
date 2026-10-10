@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import UserAvatar from '@/components/common/UserAvatar';
 import { Trophy, ArrowUpRight } from 'lucide-react';
 
 export default function LeaderboardPage() {
@@ -138,6 +139,7 @@ export default function LeaderboardPage() {
                   </div>
 
                   <div>
+                    <UserAvatar user={userObj} size="md" className="mb-3" />
                     <h3 className="text-base font-bold text-white mb-0.5">{userObj.name}</h3>
                     <p className="text-xs text-zinc-400 mb-4">
                       {userObj.branch || 'DTU'} • {userObj.batch || 'Batch'}

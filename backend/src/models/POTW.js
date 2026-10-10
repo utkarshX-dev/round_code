@@ -96,6 +96,14 @@ const potwSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    publishNotificationSent: {
+      type: Boolean,
+      default: false,
+    },
+    deadlineReminderSent: {
+      type: Boolean,
+      default: false,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -110,6 +118,7 @@ const potwSchema = new mongoose.Schema(
 // Indexes
 potwSchema.index({ status: 1 });
 potwSchema.index({ deadline: 1 });
+potwSchema.index({ status: 1, publishAt: 1, deadline: 1 });
 
 const POTW = mongoose.model('POTW', potwSchema);
 export default POTW;

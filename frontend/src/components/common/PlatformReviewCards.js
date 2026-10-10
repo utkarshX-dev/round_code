@@ -27,7 +27,7 @@ const REVIEW_CARDS = [
     id: 'welcome',
     badge: 'DTU Premier Technical Arena',
     badgeColor: 'text-[#a3ff20] border-[#a3ff20]/30 bg-[#a3ff20]/10',
-    title: 'Welcome to ROUNDCode',
+    title: 'Welcome to RoundCode',
     subtitle: 'The private competitive coding and skill acceleration platform for Round Table DTU.',
     icon: Sparkles,
     accentGlow: 'from-[#a3ff20]/20 to-emerald-500/10',
@@ -35,7 +35,7 @@ const REVIEW_CARDS = [
     content: (
       <div className="space-y-4">
         <p className="text-sm text-zinc-300 leading-relaxed">
-          ROUNDCode is engineered by <strong className="text-white">Round Table DTU</strong> to cultivate algorithmic excellence, peer collaboration, and competitive programming rigor across all batches and engineering branches.
+          RoundCode is engineered by <strong className="text-white">Round Table DTU</strong> to cultivate algorithmic excellence, peer collaboration, and competitive programming rigor across all batches and engineering branches.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
@@ -291,14 +291,14 @@ const REVIEW_CARDS = [
     badge: 'Ready to Level Up',
     badgeColor: 'text-[#a3ff20] border-[#a3ff20]/30 bg-[#a3ff20]/10',
     title: 'You Are Ready to Code!',
-    subtitle: 'Your journey at ROUNDCode starts right now.',
+    subtitle: 'Your journey at RoundCode starts right now.',
     icon: Rocket,
     accentGlow: 'from-[#a3ff20]/30 to-purple-500/10',
     borderColor: 'border-[#a3ff20]/50',
     content: (
       <div className="space-y-4">
         <p className="text-sm text-zinc-300 leading-relaxed">
-          Here is your quick roadmap to make the most out of your ROUNDCode experience:
+          Here is your quick roadmap to make the most out of your RoundCode experience:
         </p>
 
         <div className="space-y-2">
@@ -401,7 +401,7 @@ export default function PlatformReviewCards() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="ROUNDCode Platform Review"
+      aria-label="RoundCode Platform Review"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl animate-fadeIn"
     >
       {/* Background ambient light */}
@@ -509,7 +509,7 @@ export default function PlatformReviewCards() {
                 type="button"
                 className="btn-tactile-lime flex items-center gap-2 text-xs !py-2 !px-4"
               >
-                <span>Enter ROUNDCode</span>
+                <span>Enter RoundCode</span>
                 <Rocket className="w-3.5 h-3.5" />
               </button>
             ) : (

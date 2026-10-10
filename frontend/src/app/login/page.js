@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ClipLoader } from "react-spinners";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -164,10 +165,13 @@ export default function LoginPage() {
             className="w-full mt-4 btn-tactile-lime flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
-              <span>Authenticating...</span>
+              <>
+                <ClipLoader color="#090a0f" size={15} />
+                <span>Authenticating...</span>
+              </>
             ) : (
               <>
-                <span>Sign In to ROUNDCode</span>
+                <span>Sign In to RoundCode</span>
 
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
               </>

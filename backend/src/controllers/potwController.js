@@ -1,9 +1,8 @@
 import POTW from '../models/POTW.js';
-import User from '../models/User.js';
-import Notification from '../models/Notification.js';
 import AuditLog from '../models/AuditLog.js';
 import Submission from '../models/Submission.js';
 import { processPOTWPenalties } from '../utils/penaltyWorker.js';
+import { notifyActiveMembers } from '../utils/engagement.js';
 
 // Helper to validate exactly 3 problems with proper difficulties and max scores
 const validateProblemsStructure = (problems) => {
@@ -75,16 +74,16 @@ export const getCurrentPOTW = async (req, res, next) => {
         await scheduledPOTW.save();
         potw = scheduledPOTW;
 
-        // Notify active members of new active POTW
-        const members = await User.find({ accountStatus: 'active' }, '_id');
-        const notifications = members.map((m) => ({
-          userId: m._id,
-          type: 'potw',
-          title: `POTW #${potw.weekNumber} is Now Live!`,
-          message: `${potw.title} is now available. Solve all 3 problems before ${new Date(potw.deadline).toLocaleDateString()}.`,
-          link: `/potw/${potw._id}`,
-        }));
-        await Notification.insertMany(notifications);
+        if (!potw.publishNotificationSent) {
+          await notifyActiveMembers({
+            type: 'potw',
+            title: `POTW #${potw.weekNumber} is Now Live!`,
+            message: `${potw.title} is now available. Solve all 3 problems before ${new Date(potw.deadline).toLocaleDateString()}.`,
+            link: `/potw/${potw._id}`,
+          });
+          potw.publishNotificationSent = true;
+          await potw.save();
+        }
       }
     }
 
@@ -232,15 +231,14 @@ export const createPOTW = async (req, res, next) => {
 
     // Notify members if published directly as active
     if (status === 'active') {
-      const members = await User.find({ accountStatus: 'active' }, '_id');
-      const notifications = members.map((m) => ({
-        userId: m._id,
+      await notifyActiveMembers({
         type: 'potw',
         title: `New POTW Live: #${newPOTW.weekNumber} ${newPOTW.title}`,
         message: `A new weekly problem set is live! Deadline: ${new Date(newPOTW.deadline).toLocaleDateString()}`,
         link: `/potw/${newPOTW._id}`,
-      }));
-      await Notification.insertMany(notifications);
+      });
+      newPOTW.publishNotificationSent = true;
+      await newPOTW.save();
     }
 
     res.status(201).json({

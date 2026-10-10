@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import NotificationDropdown from '@/components/common/NotificationDropdown';
 import { RoleBadge } from '@/components/common/Badge';
 import RoundTableLogo from '@/components/common/RoundTableLogo';
+import UserAvatar from '@/components/common/UserAvatar';
 
 import { Code2, LogOut, User } from 'lucide-react';
 
@@ -32,7 +33,7 @@ export default function Navbar() {
         <Link
           id="tour-brand"
           href={user ? '/dashboard' : '/'}
-          aria-label="ROUNDCode home"
+          aria-label="RoundCode home"
           className="flex items-center gap-3 group rounded-xl"
         >
           <RoundTableLogo
@@ -43,7 +44,7 @@ export default function Navbar() {
 
           <div>
             <span className="text-base sm:text-lg font-black tracking-tight text-white uppercase block">
-              ROUND<span className="text-[#a3ff20]">Code</span>
+              Round<span className="text-[#a3ff20]">Code</span>
             </span>
 
             <p className="text-[10px] text-zinc-400 hidden sm:block">
@@ -104,13 +105,7 @@ export default function Navbar() {
                 href="/profile"
                 className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl bg-[#14151e] border border-zinc-800 hover:border-[#a3ff20]/50 transition-all"
               >
-                <div className="w-7 h-7 rounded-lg bg-[#b4a2f8] flex items-center justify-center text-xs font-black text-black">
-                  {user.name ? (
-                    user.name.charAt(0).toUpperCase()
-                  ) : (
-                    <User className="w-3.5 h-3.5" />
-                  )}
-                </div>
+                <UserAvatar user={user} size="sm" />
 
                 <div className="hidden md:block text-left">
 

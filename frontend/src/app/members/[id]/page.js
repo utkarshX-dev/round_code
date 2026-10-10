@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import UserAvatar from '@/components/common/UserAvatar';
 import { StatusBadge } from '@/components/common/Badge';
 import {
   ExternalLink,
@@ -145,9 +146,7 @@ export default function MemberProfilePage() {
       <div className="bg-[#14151e] p-6 sm:p-8 rounded-3xl border border-zinc-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-[#b4a2f8] flex items-center justify-center text-3xl font-black text-black shadow-md flex-shrink-0">
-              {member.name ? member.name.charAt(0).toUpperCase() : 'M'}
-            </div>
+            <UserAvatar user={member} size="lg" />
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">{member.name}</h1>
               <p className="text-xs text-zinc-400 mt-1">

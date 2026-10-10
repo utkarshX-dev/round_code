@@ -125,6 +125,8 @@ const submissionSchema = new mongoose.Schema(
 // One submission per member per POTW
 submissionSchema.index({ userId: 1, potwId: 1 }, { unique: true });
 submissionSchema.index({ status: 1 });
+submissionSchema.index({ potwId: 1, status: 1, submittedAt: 1 });
+submissionSchema.index({ userId: 1, status: 1, reviewedAt: -1 });
 
 const Submission = mongoose.model('Submission', submissionSchema);
 export default Submission;

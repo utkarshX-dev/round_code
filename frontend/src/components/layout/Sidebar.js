@@ -16,6 +16,8 @@ import {
   FileCheck2,
   CalendarPlus,
   Crown,
+  Award,
+  MessageSquare,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -29,6 +31,8 @@ export default function Sidebar() {
     { label: 'Members', href: '/members', icon: Users },
     { label: 'Rules & Scoring', href: '/rules', icon: BookOpen },
     { label: 'My Profile', href: '/profile', icon: User },
+    { label: 'Badges & Streaks', href: '/badges', icon: Award },
+    { label: 'Community Posts', href: '/posts', icon: MessageSquare },
   ];
 
   const adminLinks = [
@@ -36,6 +40,7 @@ export default function Sidebar() {
     { label: 'Registrations', href: '/admin/registrations', icon: UserCheck },
     { label: 'Submissions', href: '/admin/submissions', icon: FileCheck2 },
     { label: 'Manage POTWs', href: '/admin/potws', icon: CalendarPlus },
+    { label: 'Manage Posts', href: '/admin/posts', icon: MessageSquare },
   ];
 
   if (isSuperAdmin) {

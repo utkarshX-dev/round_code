@@ -6,11 +6,11 @@ import AppLayout from '@/components/layout/AppLayout';
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://roundcode.vercel.app'),
   title: {
-    default: 'ROUNDCode — Round Table DTU',
-    template: '%s | ROUNDCode',
+    default: 'RoundCode — Round Table DTU',
+    template: '%s | RoundCode',
   },
   description:
-    'ROUNDCode is the private competitive coding and skill-development platform for Round Table Delhi Technological University (DTU) members. Weekly Problem of the Week (POTW), difficulty scoring, ratings, and developer profiles.',
+    'RoundCode is the private competitive coding and skill-development platform for Round Table Delhi Technological University (DTU) members. Weekly Problem of the Week (POTW), difficulty scoring, ratings, and developer profiles.',
   keywords: [
     'Round Table DTU',
     'competitive programming',
@@ -21,7 +21,7 @@ export const metadata = {
     'Codeforces',
     'developer portfolio',
   ],
-  applicationName: 'ROUNDCode',
+  applicationName: 'RoundCode',
   authors: [{ name: 'Round Table DTU' }],
   creator: 'Round Table DTU',
   publisher: 'Round Table DTU',
@@ -31,8 +31,8 @@ export const metadata = {
   category: 'education',
   openGraph: {
     type: 'website',
-    siteName: 'ROUNDCode by Round Table DTU',
-    title: 'ROUNDCode — Weekly Coding Challenges for Round Table DTU',
+    siteName: 'RoundCode by Round Table DTU',
+    title: 'RoundCode — Weekly Coding Challenges for Round Table DTU',
     description:
       'Solve weekly algorithmic challenges, receive verified code reviews, and build your competitive programming profile with Round Table DTU.',
     url: '/',
@@ -47,7 +47,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'ROUNDCode — Round Table DTU',
+    title: 'RoundCode — Round Table DTU',
     description: 'Weekly coding challenges, verified reviews, and transparent ratings for Round Table DTU members.',
     images: ['/roundtable-icon.png'],
   },

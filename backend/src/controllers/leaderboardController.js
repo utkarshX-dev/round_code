@@ -11,7 +11,7 @@ export const getAllTimeLeaderboard = async (req, res, next) => {
         role: 'member',
         accountStatus: 'active',
       })
-        .select('name dtuEmail branch batch profilePhoto rating potwsCompleted skills createdAt')
+        .select('name dtuEmail branch batch profilePhoto rating potwsCompleted currentStreak longestStreak skills createdAt')
         .sort({ rating: -1, potwsCompleted: -1, createdAt: 1 })
         .lean();
 

@@ -28,6 +28,7 @@ export const connectDB = async () => {
 
       const conn = await mongoose.connect(memoryUri, {
         autoIndex: true,
+        maxPoolSize: 10,
       });
 
       console.log("✅ In-memory MongoDB connected");
@@ -41,7 +42,14 @@ export const connectDB = async () => {
     console.log("Connecting to MongoDB Atlas...");
 
     const conn = await mongoose.connect(mongoUri, {
-      autoIndex: true,
+      autoIndex: process.env.NODE_ENV !== "production",
+      autoCreate: process.env.NODE_ENV !== "production",
+      maxPoolSize: Number(process.env.MONGO_MAX_POOL_SIZE) || 50,
+      minPoolSize: Number(process.env.MONGO_MIN_POOL_SIZE) || 5,
+      maxIdleTimeMS: 30000,
+      waitQueueTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
       serverSelectionTimeoutMS: 10000,
     });
 

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import UserAvatar from '@/components/common/UserAvatar';
 import { Search, Trophy, CheckCircle2, Trash2, AlertTriangle, ShieldAlert } from 'lucide-react';
 import RoundTableLogo from '@/components/common/RoundTableLogo';
 
@@ -201,9 +202,7 @@ export default function MembersDirectoryPage() {
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <Link href={`/members/${member._id}`} className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-11 h-11 rounded-xl bg-[#b4a2f8] flex items-center justify-center text-sm font-black text-black flex-shrink-0 shadow-sm">
-                      {member.name ? member.name.charAt(0).toUpperCase() : 'M'}
-                    </div>
+                    <UserAvatar user={member} />
                     <div className="min-w-0">
                       <h3 className="text-sm font-bold text-white group-hover:text-[#a3ff20] transition-colors leading-tight truncate">
                         {member.name}

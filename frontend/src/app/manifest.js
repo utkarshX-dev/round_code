@@ -1,7 +1,7 @@
 export default function manifest() {
   return {
-    name: 'ROUNDCode by Round Table DTU',
-    short_name: 'ROUNDCode',
+    name: 'RoundCode by Round Table DTU',
+    short_name: 'RoundCode',
     description: 'Weekly competitive programming challenges for Round Table DTU members.',
     start_url: '/',
     display: 'standalone',

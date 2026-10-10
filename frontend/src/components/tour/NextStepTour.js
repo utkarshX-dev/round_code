@@ -24,7 +24,7 @@ export const tourSteps = [
     steps: [
       {
         icon: <Sparkles className="w-5 h-5 text-[#a3ff20]" />,
-        title: 'Welcome to ROUNDCode',
+        title: 'Welcome to RoundCode',
         content: (
           <div className="space-y-2 text-xs text-zinc-300">
             <p>
@@ -114,7 +114,7 @@ export const tourSteps = [
   },
 ];
 
-// Custom Card matching ROUNDCode tactile design system
+// Custom Card matching RoundCode tactile design system
 export function CustomTourCard({
   step,
   currentStep,

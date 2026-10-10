@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import RatingHistory from '../models/RatingHistory.js';
 import Submission from '../models/Submission.js';
+import { getCloudinary } from '../config/cloudinary.js';
 
 // GET /api/users/me
 export const getMyProfile = async (req, res, next) => {
@@ -61,6 +62,7 @@ export const updateMyProfile = async (req, res, next) => {
         portfolio: codingProfiles.portfolio?.trim() || user.codingProfiles.portfolio || '',
         custom: Array.isArray(codingProfiles.custom) ? codingProfiles.custom : user.codingProfiles.custom || [],
       };
+
     }
 
     if (typeof req.body.hasSeenTour === 'boolean') {
@@ -76,6 +78,66 @@ export const updateMyProfile = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
+      data: user.toJSON(),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/users/me/profile-photo
+export const uploadProfilePhoto = async (req, res, next) => {
+  try {
+    const { image } = req.body;
+    if (typeof image !== 'string' || !image.startsWith('data:image/')) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid image file is required.',
+      });
+    }
+
+    const imageMatch = image.match(/^data:image\/(jpeg|jpg|png|webp);base64,/i);
+    if (!imageMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Only JPG, PNG, and WebP images are supported.',
+      });
+    }
+
+    const base64Payload = image.slice(image.indexOf(',') + 1);
+    const estimatedBytes = Math.ceil((base64Payload.length * 3) / 4);
+    if (estimatedBytes > 5 * 1024 * 1024) {
+      return res.status(413).json({
+        success: false,
+        message: 'Profile photos must be 5MB or smaller.',
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const cloudinary = getCloudinary();
+    const uploaded = await cloudinary.uploader.upload(image, {
+      folder: 'roundcode/profile-photos',
+      public_id: `user-${user._id}`,
+      overwrite: true,
+      invalidate: true,
+      resource_type: 'image',
+      transformation: [
+        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+        { quality: 'auto', fetch_format: 'auto' },
+      ],
+    });
+
+    user.profilePhoto = uploaded.secure_url;
+    user.profilePhotoPublicId = uploaded.public_id;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile photo updated successfully.',
       data: user.toJSON(),
     });
   } catch (error) {
@@ -175,6 +237,8 @@ export const getMemberProfile = async (req, res, next) => {
 export const getMembers = async (req, res, next) => {
   try {
     const { search, branch, batch, sort = 'rating' } = req.query;
+    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 24, 1), 100);
 
     const query = {
       role: 'member',
@@ -203,13 +267,21 @@ export const getMembers = async (req, res, next) => {
       sortOption = { name: 1 };
     }
 
-    const members = await User.find(query)
+    const [members, total] = await Promise.all([
+      User.find(query)
       .select('-password -personalEmail') // Hide sensitive private info
-      .sort(sortOption);
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+      User.countDocuments(query),
+    ]);
 
     res.status(200).json({
       success: true,
-      count: members.length,
+      count: total,
+      page,
+      limit,
       data: members,
     });
   } catch (error) {

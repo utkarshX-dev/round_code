@@ -4,6 +4,7 @@ const leaderboardCacheKeys = [
   'leaderboard:all-time',
   'leaderboard:weekly',
 ];
+const inFlightLoads = new Map();
 
 export async function getOrSetCache(key, loader, ttlSeconds) {
   if (!isRedisReady()) {
@@ -27,7 +28,20 @@ export async function getOrSetCache(key, loader, ttlSeconds) {
     }
   }
 
-  const value = await loader();
+  let load = inFlightLoads.get(key);
+  if (!load) {
+    load = Promise.resolve().then(loader);
+    inFlightLoads.set(key, load);
+  }
+
+  let value;
+  try {
+    value = await load;
+  } finally {
+    if (inFlightLoads.get(key) === load) {
+      inFlightLoads.delete(key);
+    }
+  }
 
   try {
     await redisClient.set(key, JSON.stringify(value), { EX: ttlSeconds });
@@ -44,8 +58,9 @@ export async function clearLeaderboardCache() {
   }
 
   try {
-    const monthlyKeys = await redisClient.keys('leaderboard:monthly:*');
-    const keys = [...leaderboardCacheKeys, ...monthlyKeys];
+    // Keep invalidation bounded. Redis KEYS can block the server on a large
+    // database, while the monthly cache has a short TTL and will expire naturally.
+    const keys = leaderboardCacheKeys;
 
     if (keys.length > 0) {
       await redisClient.del(keys);

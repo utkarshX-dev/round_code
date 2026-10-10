@@ -260,6 +260,7 @@ export const forgotPassword = async (req, res, next) => {
       success: true,
       statusType: 'dispatched',
       message: `Password reset link dispatched to ${user.personalEmail}.`,
+      devResetLink: process.env.NODE_ENV !== 'production' ? resetLink : undefined,
     });
   } catch (error) {
     next(error);
