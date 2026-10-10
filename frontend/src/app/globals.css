@@ -40,6 +40,96 @@ body {
   color: #090a0f;
 }
 
+.markdown-content > :first-child {
+  margin-top: 0;
+}
+
+.markdown-content > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin: 1rem 0 0.5rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.markdown-content h1 {
+  font-size: 1.25rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.125rem;
+}
+
+.markdown-content h3 {
+  font-size: 1rem;
+}
+
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content blockquote,
+.markdown-content pre {
+  margin: 0.75rem 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.5rem;
+}
+
+.markdown-content ul {
+  list-style: disc;
+}
+
+.markdown-content ol {
+  list-style: decimal;
+}
+
+.markdown-content a {
+  color: var(--accent-lime);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.markdown-content strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.markdown-content em {
+  color: #d4d4d8;
+}
+
+.markdown-content blockquote {
+  border-left: 2px solid var(--accent-lime);
+  padding-left: 0.75rem;
+  color: #a1a1aa;
+}
+
+.markdown-content code {
+  border-radius: 0.25rem;
+  background: #090a0f;
+  padding: 0.125rem 0.3rem;
+  color: #d9f99d;
+  font-size: 0.875em;
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  border: 1px solid #202230;
+  border-radius: 0.75rem;
+  background: #090a0f;
+  padding: 0.75rem;
+}
+
+.markdown-content pre code {
+  padding: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
