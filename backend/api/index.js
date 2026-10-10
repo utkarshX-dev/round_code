@@ -22,6 +22,9 @@ export default async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Backend application failed to initialize.',
+      error: process.env.NODE_ENV === 'production'
+        ? `${error.name || 'Error'}: ${error.message || 'Unknown initialization error'}`
+        : error.message,
     });
   }
 };
