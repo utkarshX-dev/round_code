@@ -13,10 +13,17 @@
     "test": "node src/tests/runTests.js",
     "test:db": "node scripts/testMongo.js"
   },
-  "keywords": ["roundcode", "dtu", "round-table", "potw", "coding-platform"],
+  "keywords": [
+    "roundcode",
+    "dtu",
+    "round-table",
+    "potw",
+    "coding-platform"
+  ],
   "author": "Round Table DTU",
   "license": "ISC",
   "dependencies": {
+    "@upstash/redis": "^1.39.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -27,6 +34,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "nodemailer": "^6.10.0",
+    "redis": "^6.3.0",
     "validator": "^13.12.0"
   },
   "devDependencies": {

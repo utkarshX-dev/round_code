@@ -11,6 +11,8 @@ import Notification from '../src/models/Notification.js';
 import AuditLog from '../src/models/AuditLog.js';
 import RegistrationRequest from '../src/models/RegistrationRequest.js';
 import PasswordResetToken from '../src/models/PasswordResetToken.js';
+import { connectRedis, disconnectRedis } from '../src/config/redis.js';
+import { clearLeaderboardCache } from '../src/utils/cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,7 +49,7 @@ function parseCliArgs() {
 const cliArgs = parseCliArgs();
 
 const SUPER_ADMIN = {
-  name: cliArgs.name || process.env.SUPER_ADMIN_NAME || 'Dr. Akhil Sharma (President RT)',
+  name: cliArgs.name || process.env.SUPER_ADMIN_NAME || 'Super Admin RoundCode',
   dtuEmail: cliArgs.dtuEmail || process.env.SUPER_ADMIN_DTU_EMAIL || 'president.rt@dtu.ac.in',
   personalEmail: cliArgs.personalEmail || process.env.SUPER_ADMIN_PERSONAL_EMAIL || 'superadmin@roundtabledtu.in',
   password: cliArgs.password || process.env.SUPER_ADMIN_PASSWORD || 'Password@123',
@@ -86,6 +88,8 @@ async function reinitializeDatabase() {
     });
     console.log(`Connected to MongoDB in ${Date.now() - connStartTime}ms (${mongoose.connection.name})\n`);
 
+    await connectRedis();
+
     console.log(`${colors.yellow}🧹 Step 1: Purging all existing collections...${colors.reset}`);
 
     const [
@@ -107,6 +111,8 @@ async function reinitializeDatabase() {
       RegistrationRequest.deleteMany({}),
       PasswordResetToken.deleteMany({}),
     ]);
+
+    await clearLeaderboardCache();
 
     console.log(`  • Users cleared:                 ${usersDeleted.deletedCount}`);
     console.log(`  • POTWs cleared:                   ${potwsDeleted.deletedCount}`);
@@ -166,12 +172,14 @@ async function reinitializeDatabase() {
     console.log(`  4. Review Members:     ${colors.cyan}http://localhost:3000/admin/registrations${colors.reset}\n`);
 
     await mongoose.disconnect();
+    await disconnectRedis();
     process.exit(0);
   } catch (error) {
     console.error(`\n${colors.red}❌ Database reinitialization failed:${colors.reset}`, error);
     try {
       await mongoose.disconnect();
     } catch {}
+    await disconnectRedis();
     process.exit(1);
   }
 }

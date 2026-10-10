@@ -4,6 +4,7 @@ dotenv.config();
 
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
+import { connectRedis } from "./config/redis.js";
 import { initMailer } from "./config/mailer.js";
 import POTW from "./models/POTW.js";
 import { processPOTWPenalties } from "./utils/penaltyWorker.js";
@@ -69,6 +70,8 @@ const startServer = async () => {
     console.log(
       "🔥 DATABASE CONNECTION FINISHED"
     );
+
+    await connectRedis();
 
     initMailer();
 

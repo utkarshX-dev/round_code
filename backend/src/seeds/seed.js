@@ -32,8 +32,8 @@ const seed = async () => {
     const superAdmin = await User.create({
       name: 'super admin',
       dtuEmail: 'super_admin_roundtable@dtu.ac.in',
-      personalEmail: 'superadmin@roundtabledtu.in',
-      password: 'Password@123',
+      personalEmail: 'superadmin@gmail.com',
+      password: 'password@123',
       role: 'super_admin',
       accountStatus: 'active',
       branch: 'Computer Engineering',
@@ -502,8 +502,8 @@ const seed = async () => {
     console.log('🎉 SEEDING COMPLETED SUCCESSFULLY!');
     console.log('=============================================================');
     console.log('Super Admin:');
-    console.log('  Email:    superadmin@roundtabledtu.in');
-    console.log('  Password: Password@123\n');
+    console.log('  Email:    superadmin@gmail.com');
+    console.log('  Password: password@123\n');
     console.log('Admin 1:');
     console.log('  Email:    admin.utkarsh@roundtabledtu.in');
     console.log('  Password: Password@123\n');

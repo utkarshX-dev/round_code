@@ -34,6 +34,7 @@
 - **Backend:**
   - Node.js & Express.js (REST API architecture)
   - Mongoose (MongoDB)
+  - Redis (optional leaderboard caching)
   - Zero-Config Development: Built-in `mongodb-memory-server` fallback for instant local run, with full MongoDB Atlas support in production
   - JWT Access Tokens & HTTP-only cookies
   - bcryptjs password hashing
@@ -69,9 +70,14 @@
                      ┌──────────────┴──────────────┐
                      ▼                             ▼
           ┌────────────────────┐        ┌────────────────────┐
-          │      MongoDB       │        │     Nodemailer     │
-          │ Atlas / In-Memory  │        │   SMTP Dispatch    │
+          │      MongoDB       │        │       Redis        │
+          │ Atlas / In-Memory  │        │ Leaderboard Cache  │
           └────────────────────┘        └────────────────────┘
+                                                   │
+                                          ┌────────┴────────┐
+                                          │   Nodemailer     │
+                                          │  SMTP Dispatch   │
+                                          └─────────────────┘
 ```
 
 ---
@@ -191,7 +197,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 | Role | Name | Personal Login Email | Password |
 |---|---|---|---|
-| **Super Admin** | Dr. Akhil Sharma (President RT) | `superadmin@roundtabledtu.in` | `Password@123` |
+| **Super Admin** | Dr. Akhil Sharma (President RT) | `superadmin@gmail.com` | `password@123` |
 | **Admin 1** | Utkarsh Bhandari (Tech Lead) | `admin.utkarsh@roundtabledtu.in` | `Password@123` |
 | **Admin 2** | Ananya Verma (DSA Head) | `ananya.admin@roundtabledtu.in` | `Password@123` |
 | **Member 1 (Rank #1)** | Priya Malik | `priya.malik@gmail.com` | `Password@123` |
