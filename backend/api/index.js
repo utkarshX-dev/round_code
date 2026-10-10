@@ -14,6 +14,14 @@ export default async (req, res) => {
     });
   }
 
-  const { default: app } = await import('../src/app.js');
-  return app(req, res);
+  try {
+    const { default: app } = await import('../src/app.js');
+    return app(req, res);
+  } catch (error) {
+    console.error('Failed to initialize backend application:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Backend application failed to initialize.',
+    });
+  }
 };
