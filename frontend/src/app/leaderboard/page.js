@@ -141,7 +141,7 @@ export default function LeaderboardPage() {
                             {userObj.branch} {userObj.batch ? `(${userObj.batch})` : ''}
                           </td>
                           <td className="py-3.5 px-6 text-right text-zinc-300 font-semibold">
-                            {userObj.potwsCompleted || item.potwsSolvedInMonth || 1}
+                            {userObj.potwsCompleted ?? item.potwsSolvedInMonth ?? 1}
                           </td>
                           <td className="py-3.5 px-6 text-right font-black text-[#a3ff20]">
                             {scoreValue}
