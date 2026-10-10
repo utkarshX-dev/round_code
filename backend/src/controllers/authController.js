@@ -68,14 +68,18 @@ export const firebaseLogin = async (req, res, next) => {
 export const adminLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required.' });
+    if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'College ID or personal email, and password are required.',
+      });
     }
 
+    const loginEmail = email.trim().toLowerCase();
     const user = await User.findOne({
       $or: [
-        { personalEmail: email.trim().toLowerCase() },
-        { dtuEmail: email.trim().toLowerCase() },
+        { personalEmail: loginEmail },
+        { dtuEmail: loginEmail },
       ],
       role: { $in: ['admin', 'super_admin'] },
     });

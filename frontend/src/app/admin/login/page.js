@@ -37,7 +37,9 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <RoundTableLogo size={60} className="mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg" showGlow />
           <h2 className="text-2xl sm:text-3xl font-black text-white uppercase">Admin Login</h2>
-          <p className="text-xs text-zinc-400 mt-2">Use your administrator email and password.</p>
+          <p className="text-xs text-zinc-400 mt-2">
+            Use your college ID or personal email and password.
+          </p>
         </div>
 
         {error && (
@@ -53,9 +55,10 @@ export default function AdminLoginPage() {
             <input
               type="email"
               required
+              autoComplete="username"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="Admin email"
+              placeholder="College ID or personal email"
               className="w-full bg-[#090a0f] border border-[#202230] rounded-2xl pl-11 pr-4 py-3 text-xs text-white focus:outline-none focus:border-purple-400"
             />
           </div>
@@ -64,6 +67,7 @@ export default function AdminLoginPage() {
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Admin password"

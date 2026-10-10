@@ -5,6 +5,7 @@ import RatingHistory from '../models/RatingHistory.js';
 import Notification from '../models/Notification.js';
 import AuditLog from '../models/AuditLog.js';
 import PasswordResetToken from '../models/PasswordResetToken.js';
+import validator from 'validator';
 
 // GET /api/admin/dashboard (Admin & Super Admin)
 export const getAdminDashboardStats = async (req, res, next) => {
@@ -101,7 +102,16 @@ export const createAdmin = async (req, res, next) => {
   try {
     const { name, dtuEmail, personalEmail, password, branch, batch } = req.body;
 
-    if (!name || !dtuEmail || !personalEmail || !password) {
+    if (
+      typeof name !== 'string' ||
+      typeof dtuEmail !== 'string' ||
+      typeof personalEmail !== 'string' ||
+      typeof password !== 'string' ||
+      !name.trim() ||
+      !dtuEmail.trim() ||
+      !personalEmail.trim() ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
         message: 'Name, DTU Email, Personal Email, and Password are required.',
@@ -111,10 +121,17 @@ export const createAdmin = async (req, res, next) => {
     const cleanDtu = dtuEmail.trim().toLowerCase();
     const cleanPersonal = personalEmail.trim().toLowerCase();
 
-    if (!cleanDtu.endsWith('@dtu.ac.in')) {
+    if (!validator.isEmail(cleanDtu) || !cleanDtu.endsWith('@dtu.ac.in')) {
       return res.status(400).json({
         success: false,
         message: 'DTU Email must end with @dtu.ac.in',
+      });
+    }
+
+    if (!validator.isEmail(cleanPersonal)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Personal Email must be a valid email address.',
       });
     }
 

@@ -199,7 +199,7 @@ export default function SuperAdminPage() {
 
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1 font-mono">
-                DTU Email (*@dtu.ac.in)
+                College ID (*@dtu.ac.in)
               </label>
               <input
                 type="email"
