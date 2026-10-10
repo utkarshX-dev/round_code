@@ -9,7 +9,6 @@ import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
-import registrationRoutes from "./routes/registrationRoutes.js";
 import potwRoutes from "./routes/potwRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -219,11 +218,6 @@ app.get("/api/db-test", async (req, res) => {
 // =====================================================
 
 app.use("/api/auth", authRoutes);
-
-app.use(
-  "/api/registrations",
-  registrationRoutes
-);
 
 app.use("/api/potws", potwRoutes);
 

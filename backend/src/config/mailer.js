@@ -1,8 +1,12 @@
 import nodemailer from 'nodemailer';
 
 let transporter = null;
+let initialized = false;
 
 export const initMailer = () => {
+  if (initialized) return;
+  initialized = true;
+
   const host = process.env.SMTP_HOST?.trim();
   const user = process.env.SMTP_USER?.trim();
   const rawPass = process.env.SMTP_PASSWORD;
@@ -30,11 +34,13 @@ export const initMailer = () => {
       }
     });
   } else {
-    console.log('No SMTP credentials found in environment. Mailer running in Dev/Log Mode.');
+    console.error('[SMTP Mailer] SMTP credentials are not configured.');
   }
 };
 
 export const sendEmail = async ({ to, subject, text, html }) => {
+  if (!initialized) initMailer();
+
   const rawFrom = process.env.SMTP_FROM || process.env.SMTP_USER || 'roundtable.dtu2k26@gmail.com';
   const from = rawFrom.includes('<') ? rawFrom : `"ROUNDCode — Round Table DTU" <${rawFrom.trim()}>`;
 
@@ -62,5 +68,11 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     }
   }
 
-  return { success: true, simulated: true };
+  const error = 'SMTP transporter is not configured';
+  console.error(`[SMTP Mailer] ${error}`);
+  return {
+    success: false,
+    error,
+    simulated: process.env.NODE_ENV !== 'production',
+  };
 };

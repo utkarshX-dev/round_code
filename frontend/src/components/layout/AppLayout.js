@@ -13,7 +13,7 @@ export default function AppLayout({ children }) {
   const { user } = useAuth();
   const pathname = usePathname();
 
-  const isPublicPage = ['/', '/login', '/register', '/forgot-password', '/reset-password'].includes(pathname);
+  const isPublicPage = ['/', '/login', '/admin/login'].includes(pathname);
   const showSidebar = user && !isPublicPage;
 
   return (

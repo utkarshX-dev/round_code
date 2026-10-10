@@ -8,6 +8,8 @@ node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
+serviceAccountKey.json
+**/serviceAccountKey.json
 
 # Next.js
 .next/
@@ -45,3 +47,5 @@ coverage/
 # Misc
 *.swp
 *.swo
+
+serviceAccountKey.json

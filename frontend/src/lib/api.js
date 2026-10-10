@@ -3,26 +3,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 class ApiClient {
   constructor() {
     this.token = null;
-    if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('roundcode_token');
-    }
   }
 
   setToken(token) {
     this.token = token;
-    if (typeof window !== 'undefined') {
-      if (token) {
-        localStorage.setItem('roundcode_token', token);
-      } else {
-        localStorage.removeItem('roundcode_token');
-      }
-    }
   }
 
   getToken() {
-    if (!this.token && typeof window !== 'undefined') {
-      this.token = localStorage.getItem('roundcode_token');
-    }
     return this.token;
   }
 
@@ -34,10 +21,6 @@ class ApiClient {
       'Content-Type': 'application/json',
       ...options.headers,
     };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
 
     try {
       const response = await fetch(url, {

@@ -30,6 +30,7 @@ export const updateMyProfile = async (req, res, next) => {
 
     const {
       name,
+      dtuEmail,
       bio,
       profilePhoto,
       branch,
@@ -41,6 +42,13 @@ export const updateMyProfile = async (req, res, next) => {
 
     // Allowed updates (Explicitly ignore rating, role, accountStatus, potwsCompleted)
     if (name) user.name = name.trim();
+    if (dtuEmail !== undefined) {
+      const cleanDtuEmail = dtuEmail.trim().toLowerCase();
+      if (cleanDtuEmail && !/^[a-zA-Z0-9._%+-]+@dtu\.ac\.in$/.test(cleanDtuEmail)) {
+        return res.status(400).json({ success: false, message: 'College email must end with @dtu.ac.in.' });
+      }
+      user.dtuEmail = cleanDtuEmail || undefined;
+    }
     if (bio !== undefined) user.bio = bio.trim();
     if (profilePhoto !== undefined) user.profilePhoto = profilePhoto.trim();
     if (branch) user.branch = branch.trim();

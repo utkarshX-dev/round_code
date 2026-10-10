@@ -29,23 +29,30 @@ const userSchema = new mongoose.Schema(
     },
     dtuEmail: {
       type: String,
-      required: [true, 'DTU Email is required'],
+      required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
       match: [/^[a-zA-Z0-9._%+-]+@dtu\.ac\.in$/, 'DTU Email must end with @dtu.ac.in'],
     },
     personalEmail: {
       type: String,
-      required: [true, 'Personal Email is required'],
+      required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters'],
+      required: false,
+    },
+    firebaseUid: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
     },
     role: {
       type: String,
@@ -134,20 +141,22 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before saving if modified
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  if (this.isModified('password') && this.password) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
   next();
 });
 
 userSchema.index({ role: 1, accountStatus: 1, rating: -1, potwsCompleted: -1, createdAt: 1 });
 userSchema.index({ role: 1, accountStatus: 1, branch: 1, batch: 1 });
 
-// Compare password method
-userSchema.methods.comparePassword = async function (candidatePassword) {
+userSchema.methods.comparePassword = function (candidatePassword) {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Compare password method
 // Safe JSON serialization (never leak password)
 userSchema.methods.toJSON = function () {
   const user = this.toObject();

@@ -19,9 +19,6 @@ export default function Navbar() {
 
   const isAuthPage = [
     '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password',
   ].includes(pathname);
 
   return (
@@ -80,13 +77,6 @@ export default function Navbar() {
                   className="text-xs font-black uppercase tracking-wider text-white border-2 border-[#a3ff20] bg-[#12131c] px-3.5 py-1.5 rounded-xl shadow-[0_3px_0_0_#a3ff20] active:translate-y-[2px] active:shadow-none hover:bg-[#1a1c29] transition-all"
                 >
                   Login
-                </Link>
-
-                <Link
-                  href="/register"
-                  className="text-xs font-black uppercase tracking-wider text-black bg-[#a3ff20] border-2 border-[#a3ff20] px-4 py-1.5 rounded-xl shadow-[0_3px_0_0_#6cb204] active:translate-y-[2px] active:shadow-none hover:bg-[#b5ff38] transition-all"
-                >
-                  Apply
                 </Link>
 
               </div>

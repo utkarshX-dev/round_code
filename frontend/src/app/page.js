@@ -85,10 +85,10 @@ export default function LandingPage() {
         {/* Buttons matching Screenshot 1 & 2 tactile press feel */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href="/register"
+            href="/login"
             className="w-full sm:w-auto btn-tactile-lime"
           >
-            Apply Now
+            Continue with Google
           </Link>
           <Link
             href="/potw"

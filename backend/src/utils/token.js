@@ -1,22 +1,21 @@
-import jwt from 'jsonwebtoken';
+import { deleteSession } from './session.js';
 
-export const generateToken = (userId, role) => {
-  const secret = process.env.JWT_SECRET || 'roundcode_super_secure_jwt_secret_key_2026';
-  return jwt.sign({ userId, role }, secret, {
-    expiresIn: '7d',
-  });
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-export const setAuthCookie = (res, token) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  res.cookie('roundcode_token', token, {
+export const setAuthCookie = (res, sessionId) => {
+  res.cookie('roundcode_session', sessionId, cookieOptions);
+};
+
+export const clearAuthCookie = async (res, sessionId) => {
+  await deleteSession(sessionId);
+  res.clearCookie('roundcode_session', {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
   });
-};
-
-export const clearAuthCookie = (res) => {
-  res.clearCookie('roundcode_token');
 };

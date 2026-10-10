@@ -14,7 +14,7 @@ export default function AdminPostsPage() {
   const [form, setForm] = useState({ title: '', body: '', isPinned: false });
   const [saving, setSaving] = useState(false);
   const load = async () => { const res = await api.get('/posts'); setPosts(res.data || []); };
-  useEffect(() => { if (!authLoading && (!user || !isAdmin)) router.push(user ? '/dashboard' : '/login'); if (isAdmin) load().catch(console.error); }, [user, isAdmin, authLoading, router]);
+  useEffect(() => { if (!authLoading && (!user || !isAdmin)) router.push(user ? '/dashboard' : '/admin/login'); if (isAdmin) load().catch(console.error); }, [user, isAdmin, authLoading, router]);
   const create = async (event) => { event.preventDefault(); setSaving(true); try { await api.post('/posts', form); setForm({ title: '', body: '', isPinned: false }); await load(); } catch (error) { alert(error.message); } finally { setSaving(false); } };
   const remove = async (id) => { if (!window.confirm('Delete this post?')) return; await api.delete(`/posts/${id}`); await load(); };
   if (authLoading || !isAdmin) return <LoadingSpinner text="Loading post management..." />;

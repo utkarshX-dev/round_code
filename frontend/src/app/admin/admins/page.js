@@ -45,7 +45,7 @@ export default function SuperAdminPage() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!user) router.push('/login');
+      if (!user) router.push('/admin/login');
       else if (!isSuperAdmin) router.push('/admin/dashboard');
     }
   }, [user, isSuperAdmin, authLoading, router]);
@@ -181,7 +181,7 @@ export default function SuperAdminPage() {
             <h3 className="text-base font-bold text-white">Appoint New Administrator</h3>
           </div>
           <p className="text-xs text-slate-400">
-            Admins have permissions to review submissions, schedule POTWs, and approve registrations.
+            Admins have permissions to review submissions and schedule POTWs.
           </p>
 
           <form onSubmit={handleCreateAdmin} className="space-y-4 pt-2">

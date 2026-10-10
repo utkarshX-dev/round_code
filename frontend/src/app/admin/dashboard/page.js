@@ -8,7 +8,6 @@ import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { StatusBadge } from '@/components/common/Badge';
 import {
-  UserCheck,
   FileCheck2,
   Activity,
   ArrowRight,
@@ -26,7 +25,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!user) router.push('/login');
+      if (!user) router.push('/admin/login');
       else if (!isAdmin) router.push('/dashboard');
     }
   }, [user, isAdmin, authLoading, router]);
@@ -186,13 +185,6 @@ export default function AdminDashboardPage() {
             <span>Manage Members ({stats.totalMembers})</span>
           </Link>
           <Link
-            href="/admin/registrations"
-            className="px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider btn-tactile-lime flex items-center gap-1.5"
-          >
-            <UserCheck className="w-4 h-4" />
-            <span>Review Registrations ({stats.pendingRegistrations})</span>
-          </Link>
-          <Link
             href="/admin/submissions"
             className="px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider btn-tactile-dark flex items-center gap-1.5"
           >
@@ -214,13 +206,6 @@ export default function AdminDashboardPage() {
           </div>
           <span className="text-2xl font-black text-white mt-1 block">{stats.totalMembers}</span>
         </Link>
-
-        <div className="bg-[#12131b] p-4 rounded-2xl border border-[#202230]">
-          <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider block">Pending Registrations</span>
-          <span className="text-2xl font-black text-[#a3ff20] mt-1 block">
-            {stats.pendingRegistrations}
-          </span>
-        </div>
 
         <div className="bg-[#12131b] p-4 rounded-2xl border border-[#202230]">
           <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider block">Active POTW</span>
@@ -253,47 +238,6 @@ export default function AdminDashboardPage() {
 
       {/* Main Review Queues */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Registrations Queue */}
-        <div className="bg-[#12131b] p-6 rounded-3xl border border-[#202230] space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-[#a3ff20]" />
-              <span>Recent Applications</span>
-            </h3>
-            <Link
-              href="/admin/registrations"
-              className="text-xs text-[#a3ff20] hover:underline font-bold flex items-center gap-1"
-            >
-              Manage all →
-            </Link>
-          </div>
-
-          <div className="space-y-2.5">
-            {stats.recentRegistrations?.length > 0 ? (
-              stats.recentRegistrations.map((reg) => (
-                <div
-                  key={reg._id}
-                  className="p-3.5 rounded-xl bg-[#090a0f] border border-[#202230] flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <h5 className="font-bold text-white">{reg.name}</h5>
-                    <p className="text-[11px] text-zinc-400">
-                      {reg.dtuEmail} • {reg.branch}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status={reg.status} />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-zinc-500 py-6 text-center">
-                No recent registration requests.
-              </p>
-            )}
-          </div>
-        </div>
-
         {/* Recent Submissions Queue */}
         <div className="bg-[#12131b] p-6 rounded-3xl border border-[#202230] space-y-4">
           <div className="flex items-center justify-between">

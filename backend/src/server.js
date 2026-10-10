@@ -5,7 +5,6 @@ dotenv.config();
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { connectRedis } from "./config/redis.js";
-import { initMailer } from "./config/mailer.js";
 import POTW from "./models/POTW.js";
 import { processPOTWPenalties } from "./utils/penaltyWorker.js";
 import { notifyActiveMembers } from "./utils/engagement.js";
@@ -97,8 +96,6 @@ const startServer = async () => {
     );
 
     await connectRedis();
-
-    initMailer();
 
     // Periodic deadline worker
     setInterval(

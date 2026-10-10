@@ -7,7 +7,6 @@ import Submission from '../models/Submission.js';
 import RatingHistory from '../models/RatingHistory.js';
 import Notification from '../models/Notification.js';
 import AuditLog from '../models/AuditLog.js';
-import RegistrationRequest from '../models/RegistrationRequest.js';
 
 dotenv.config();
 
@@ -24,7 +23,6 @@ const seed = async () => {
       RatingHistory.deleteMany({}),
       Notification.deleteMany({}),
       AuditLog.deleteMany({}),
-      RegistrationRequest.deleteMany({}),
     ]);
 
     console.log('Seeding Users...');
@@ -207,37 +205,6 @@ const seed = async () => {
     ];
 
     const createdMembers = await User.create(membersData);
-
-    console.log('Seeding Sample Registration Requests...');
-    await RegistrationRequest.create([
-      {
-        name: 'Tanmay Saxena',
-        dtuEmail: 'tanmay24me@dtu.ac.in',
-        personalEmail: 'tanmay.saxena@gmail.com',
-        branch: 'Mechanical Engineering',
-        batch: '2028',
-        status: 'pending',
-      },
-      {
-        name: 'Kavya Jain',
-        dtuEmail: 'kavya24coe@dtu.ac.in',
-        personalEmail: 'kavya.jain@gmail.com',
-        branch: 'Computer Engineering',
-        batch: '2028',
-        status: 'pending',
-      },
-      {
-        name: 'Harsh Vardhan',
-        dtuEmail: 'harsh23ene@dtu.ac.in',
-        personalEmail: 'harsh.v@gmail.com',
-        branch: 'Environmental Engineering',
-        batch: '2027',
-        status: 'rejected',
-        rejectionReason: 'Invalid student ID verification details.',
-        reviewedBy: admin1._id,
-        reviewedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      },
-    ]);
 
     console.log('Seeding 2 POTWs (POTW #11 closed, POTW #12 active)...');
     const now = new Date();

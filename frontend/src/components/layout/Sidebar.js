@@ -12,7 +12,6 @@ import {
   BookOpen,
   User,
   ShieldAlert,
-  UserCheck,
   FileCheck2,
   CalendarPlus,
   Crown,
@@ -37,7 +36,6 @@ export default function Sidebar() {
 
   const adminLinks = [
     { label: 'Admin Hub', href: '/admin/dashboard', icon: ShieldAlert },
-    { label: 'Registrations', href: '/admin/registrations', icon: UserCheck },
     { label: 'Submissions', href: '/admin/submissions', icon: FileCheck2 },
     { label: 'Manage POTWs', href: '/admin/potws', icon: CalendarPlus },
     { label: 'Manage Posts', href: '/admin/posts', icon: MessageSquare },

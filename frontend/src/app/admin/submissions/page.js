@@ -44,7 +44,7 @@ export default function AdminSubmissionsPage() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!user) router.push('/login');
+      if (!user) router.push('/admin/login');
       else if (!isAdmin) router.push('/dashboard');
     }
   }, [user, isAdmin, authLoading, router]);

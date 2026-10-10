@@ -85,11 +85,6 @@ export default function Footer() {
                   Problem of the Week
                 </Link>
               </li>
-              <li>
-                <Link href="/register" className="hover:text-[#a3ff20] transition-colors">
-                  Apply for Membership
-                </Link>
-              </li>
             </ul>
           </div>
 

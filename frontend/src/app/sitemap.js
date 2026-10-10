@@ -1,4 +1,4 @@
-const publicRoutes = ['', '/rules', '/leaderboard', '/members', '/potw', '/login', '/register'];
+const publicRoutes = ['', '/rules', '/leaderboard', '/members', '/potw', '/login', '/admin/login'];
 
 export default function sitemap() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://roundcode.vercel.app';

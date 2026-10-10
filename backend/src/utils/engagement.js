@@ -1,6 +1,5 @@
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
-import { sendEmail } from '../config/mailer.js';
 
 export const BADGES = {
   FIRST_SUBMISSION: { key: 'first_submission', name: 'First Step', description: 'Submitted your first POTW.' },
@@ -17,13 +16,6 @@ const badgeByKey = Object.values(BADGES).reduce((map, badge) => {
 
 export const notifyUser = async ({ user, type = 'system', title, message, link = '', email = true }) => {
   await Notification.create({ userId: user._id, type, title, message, link });
-  if (email && user.personalEmail) {
-    await sendEmail({
-      to: user.personalEmail,
-      subject: `ROUNDCode — ${title}`,
-      text: `${message}\n\nOpen ROUNDCode: ${process.env.CLIENT_URL || 'http://localhost:3000'}${link}`,
-    });
-  }
 };
 
 export const notifyActiveMembers = async ({ type = 'system', title, message, link = '' }) => {
@@ -37,25 +29,6 @@ export const notifyActiveMembers = async ({ type = 'system', title, message, lin
     { ordered: false }
   );
 
-  // Do not make a user-facing request wait for an email broadcast.
-  setImmediate(() => {
-    const sendBroadcastEmails = async () => {
-      for (let index = 0; index < members.length; index += 10) {
-        const batch = members.slice(index, index + 10);
-        await Promise.all(batch.map((user) => {
-          if (!user.personalEmail) return Promise.resolve();
-          return sendEmail({
-            to: user.personalEmail,
-            subject: `ROUNDCode — ${title}`,
-            text: `${message}\n\nOpen ROUNDCode: ${process.env.CLIENT_URL || 'http://localhost:3000'}${link}`,
-          });
-        }));
-      }
-    };
-    sendBroadcastEmails().catch((error) => {
-      console.error('Broadcast email delivery failed:', error.message);
-    });
-  });
 };
 
 export const awardBadges = async (user, { perfectScore = false } = {}) => {

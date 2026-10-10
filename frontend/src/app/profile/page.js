@@ -54,6 +54,7 @@ export default function MyProfilePage() {
   const [activeTab, setActiveTab] = useState('profile'); // profile, projects, password, history
   const [profileData, setProfileData] = useState({
     name: '',
+    dtuEmail: '',
     bio: '',
     branch: '',
     batch: '',
@@ -116,6 +117,7 @@ export default function MyProfilePage() {
           });
           setProfileData({
             name: res.data.name || '',
+            dtuEmail: res.data.dtuEmail || '',
             bio: res.data.bio || '',
             branch: res.data.branch || '',
             batch: res.data.batch || '',
@@ -426,13 +428,14 @@ export default function MyProfilePage() {
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  DTU Email (Read-only)
+                  College Email
                 </label>
                 <input
                   type="email"
-                  disabled
-                  value={user.dtuEmail}
-                  className="w-full bg-[#0b0c10]/60 border border-zinc-900 rounded-xl px-4 py-2.5 text-xs text-zinc-500 cursor-not-allowed"
+                  value={profileData.dtuEmail}
+                  onChange={(e) => setProfileData({ ...profileData, dtuEmail: e.target.value })}
+                  placeholder="yourname@dtu.ac.in"
+                  className="w-full bg-[#0b0c10] border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#a3ff20] transition-colors"
                 />
               </div>
 

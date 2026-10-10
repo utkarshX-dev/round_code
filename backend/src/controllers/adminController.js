@@ -1,5 +1,4 @@
 import User from '../models/User.js';
-import RegistrationRequest from '../models/RegistrationRequest.js';
 import POTW from '../models/POTW.js';
 import Submission from '../models/Submission.js';
 import RatingHistory from '../models/RatingHistory.js';
@@ -12,17 +11,14 @@ export const getAdminDashboardStats = async (req, res, next) => {
   try {
     const [
       totalMembers,
-      pendingRegistrations,
       activePOTW,
       pendingSubmissions,
       ratingStats,
-      recentRegistrations,
       recentSubmissions,
       recentReviews,
       recentAudits,
     ] = await Promise.all([
       User.countDocuments({ role: 'member', accountStatus: 'active' }),
-      RegistrationRequest.countDocuments({ status: 'pending' }),
       POTW.findOne({ status: 'active' }).lean(),
       Submission.countDocuments({ status: { $in: ['submitted', 'under_review'] } }),
       User.aggregate([
@@ -36,7 +32,6 @@ export const getAdminDashboardStats = async (req, res, next) => {
           },
         },
       ]),
-      RegistrationRequest.find().sort({ createdAt: -1 }).limit(5).lean(),
       Submission.find()
         .populate('userId', 'name dtuEmail rating')
         .populate('potwId', 'weekNumber title')
@@ -68,14 +63,12 @@ export const getAdminDashboardStats = async (req, res, next) => {
       success: true,
       data: {
         totalMembers,
-        pendingRegistrations,
         activePOTW,
         pendingSubmissions,
         solutionsToReview: pendingSubmissions,
         avgRating,
         maxRating,
         participationRate,
-        recentRegistrations,
         recentSubmissions,
         recentReviews,
         recentAudits,
@@ -349,14 +342,6 @@ export const removeMember = async (req, res, next) => {
       personalEmail: targetUser.personalEmail,
       role: targetUser.role,
     };
-
-    // Remove any registration requests associated with these emails so they can re-register cleanly if desired
-    await RegistrationRequest.deleteMany({
-      $or: [
-        { dtuEmail: targetUser.dtuEmail },
-        { personalEmail: targetUser.personalEmail },
-      ],
-    });
 
     // Clean up notifications and reset tokens
     await Notification.deleteMany({ userId: targetUser._id });
