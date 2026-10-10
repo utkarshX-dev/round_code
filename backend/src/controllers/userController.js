@@ -205,17 +205,13 @@ export const getMemberProfile = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Member not found' });
     }
 
-    // Calculate member's all-time rank
-    const higherRatingCount = await User.countDocuments({
+    // Calculate a dense all-time rank: equal ratings share a rank.
+    const higherRatings = await User.distinct('rating', {
       role: 'member',
       accountStatus: 'active',
-      $or: [
-        { rating: { $gt: user.rating } },
-        { rating: user.rating, potwsCompleted: { $gt: user.potwsCompleted } },
-        { rating: user.rating, potwsCompleted: user.potwsCompleted, createdAt: { $lt: user.createdAt } },
-      ],
+      rating: { $gt: user.rating },
     });
-    const rank = higherRatingCount + 1;
+    const rank = higherRatings.length + 1;
 
     // Fetch rating history for rating chart
     const ratingHistory = await RatingHistory.find({ userId: user._id })
