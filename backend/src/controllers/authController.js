@@ -45,14 +45,23 @@ export const firebaseLogin = async (req, res, next) => {
       if (decoded.picture && !user.profilePhoto) user.profilePhoto = decoded.picture;
       await user.save();
     } else {
-      user = await User.create({
-        firebaseUid: decoded.uid,
-        name: decoded.name?.trim() || email.split('@')[0],
-        personalEmail: email,
-        profilePhoto: decoded.picture || '',
-        role: 'member',
-        accountStatus: 'active',
-      });
+      try {
+        user = await User.create({
+          firebaseUid: decoded.uid,
+          name: decoded.name?.trim() || email.split('@')[0],
+          personalEmail: email,
+          profilePhoto: decoded.picture || '',
+          role: 'member',
+          accountStatus: 'active',
+        });
+      } catch (error) {
+        if (error.code !== 11000) throw error;
+
+        user = await User.findOne({
+          $or: [{ firebaseUid: decoded.uid }, { personalEmail: email }],
+        });
+        if (!user) throw error;
+      }
     }
 
     if (user.accountStatus !== 'active') {
