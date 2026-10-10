@@ -3,14 +3,14 @@ import Submission from '../models/Submission.js';
 import POTW from '../models/POTW.js';
 import { getOrSetCache } from '../utils/cache.js';
 
-const addCompetitionRanks = (entries, getScore) => {
+const addDenseRanks = (entries, getScore) => {
   let previousScore;
   let rank = 0;
 
   return entries.map((entry, index) => {
     const score = getScore(entry);
     if (index === 0 || score !== previousScore) {
-      rank = index + 1;
+      rank += 1;
       previousScore = score;
     }
 
@@ -30,7 +30,7 @@ export const getAllTimeLeaderboard = async (req, res, next) => {
         .sort({ rating: -1, potwsCompleted: -1, createdAt: 1 })
         .lean();
 
-      const leaderboard = addCompetitionRanks(
+      const leaderboard = addDenseRanks(
         members.map((member) => ({ ...member })),
         (member) => member.rating
       );
@@ -72,7 +72,7 @@ export const getWeeklyLeaderboard = async (req, res, next) => {
         .sort({ totalScore: -1, submittedAt: 1 })
         .lean();
 
-      const leaderboard = addCompetitionRanks(
+      const leaderboard = addDenseRanks(
         submissions.map((sub) => ({
         score: sub.totalScore,
         submittedAt: sub.submittedAt,
@@ -144,7 +144,7 @@ export const getMonthlyLeaderboard = async (req, res, next) => {
       const userMap = new Map();
       users.forEach((u) => userMap.set(u._id.toString(), u));
 
-      const leaderboard = addCompetitionRanks(
+      const leaderboard = addDenseRanks(
         monthlyAggregation
         .map((item) => {
           const user = userMap.get(item._id.toString());
