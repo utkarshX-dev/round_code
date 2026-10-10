@@ -29,7 +29,6 @@ export const firebaseLogin = async (req, res, next) => {
       $or: [
         { firebaseUid: decoded.uid },
         { personalEmail: email },
-        { dtuEmail: email },
       ],
     });
 
